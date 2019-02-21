@@ -85,7 +85,7 @@ def signval(val, err=0.0):
   valstr = '{:.{digits}e}'.format(val, digits=sdigits)
   return [valstr, errstr]
 
-def val(val, err=0.0, name=''):
+def val(name, val, err=0.0):
   """
   Parameters
 
@@ -212,9 +212,12 @@ def chi2_red(yo, dyo, ye, dye=[], dof=0):
 
 class pltext:
   @staticmethod
-  def initplot(num=0, title='', xlabel='', ylabel='', scale='linlin'):
+  def initplot(num=0, title='', xlabel='', ylabel='', scale='linlin', fignum=False):
     fig = plt.figure(num)
-    plt.title(title, fontsize='14')
+    if fignum:
+      plt.title('Abbildung ' + str(num) + ': ' + title, fontsize='14')
+    else:
+      plt.title(title, fontsize='14')
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.grid(True, which='both')
