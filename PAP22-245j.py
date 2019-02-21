@@ -1,9 +1,11 @@
 import measure as ms
-from measure import pi, sqrt, arcsin, arccos, arctan
+from measure import pi, sqrt, sin, cos, arcsin, arccos, arctan
 from measure import npfarray as npf
 import numpy as np
 import scipy.constants as sc
 from scipy.optimize import curve_fit
+
+ms.plt.rc('figure', figsize=(11.69, 8.27))
 
 # Data of the helmholtz-coil
 d_h = 0.295
@@ -46,8 +48,8 @@ d_U2_i = npf([0.010, 0.010, 0.020, 0.020, 0.040, 0.020, 0.040, 0.020, 0.020]) / 
 # Rotation angle and induced voltage at constant a.c. voltage
 f3 = 98.03
 d_f3 = 1.0
-alpha3 = npf([0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330])
-d_alpha3 = npf([3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3])
+α3 = npf([0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330])
+d_α3 = npf([3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3])
 U3_i = npf([2.52, 2.24, 1.36, 0.046, 1.25, 2.22, 2.51, 2.14, 1.24, 0.028, 1.19, 2.14]) / 2
 d_U3_i = npf([0.01, 0.01, 0.01, 0.002, 0.01, 0.01, 0.01, 0.01, 0.01, 0.002, 0.01, 0.01]) / 2
 
@@ -76,10 +78,10 @@ U6_i = 0.072 / 2
 d_U6_i = 0.001 / 2
 
 # Determination of the magnetic field at the center of the helmholtz coil
-ms.pltext.initplot(num=1, title='Abbildung 2: Induzierte Spannung bei konstantem Strom', xlabel='f', ylabel='U')
-[s1, d_s1, tmp, tmp] = ms.linreg(f1, U1_i, d_U1_i, d_f1, create_graph=True)
-ms.pltext.initplot(num=2, title='Abbildung 3: Induzierte Spannung bei konstanter Frequenz', xlabel='I', ylabel='U')
-ms.linreg(I2, U2_i, d_U2_i, d_I2, create_graph=True)
+ms.pltext.initplot(num=2, title='Induzierte Spannung in Abhängigkeit der Rotationsfrequenz bei konstantem Strom und Gleichspannung', xlabel='f / Hz', ylabel='U / V', fignum=True)
+[s1, d_s1, tmp, tmp] = ms.linreg(f1, U1_i, d_U1_i, d_f1, plot=True)
+ms.pltext.initplot(num=3, title='Induzierte Spannung in Abhängigkeit des Spulenstroms bei konstanter Rotationsfrequenz und Gleichspannung', xlabel='I / A', ylabel='U / V', fignum=True)
+ms.linreg(I2, U2_i, d_U2_i, d_I2, plot=True)
 
 B1 = s1 / (2 * pi * n_i * A_i)
 d_B1 = d_s1 / (2 * pi * n_i * A_i)
@@ -94,18 +96,18 @@ print(ms.sig("B1,B1'", B1, d_B1, B1_, d_B1_))
 print()
 
 # Determination of the inductance of the helmholtz coil
-ms.pltext.initplot(num=3, title='Abbildung 4: Amplitude der Induktionsspannung in Abhängigkeit des Winkels', xlabel='α', ylabel='U')
-ms.pltext.plotdata(alpha3, U3_i, d_U3_i, d_alpha3, connect=True)
+ms.pltext.initplot(num=4, title='Amplitude der Induktionsspannung in Abhängigkeit des Winkels bei Wechselspannung', xlabel='α / °', ylabel='U / V', fignum=True)
+ms.pltext.plotdata(α3, U3_i, d_U3_i, d_α3, connect=True)
 
 Ui_U_ratio = U4_i / U4
 d_Ui_U_ratio = Ui_U_ratio * sqrt((d_U4_i / U4_i)**2 + (d_U4 / U4)**2)
-ms.pltext.initplot(num=4, title='Abbildung 5: Verhältnis der Induktionsspannungsamplitude zur Spulenspannungsamplitude in Abhängigkeit der Frequenz', xlabel='f', ylabel='Ui/U')
+ms.pltext.initplot(num=5, title='Verhältnis der Induktionsspannungsamplitude zur Spulenspannungsamplitude\nin Abhängigkeit der Spannungsfrequenz bei Wechselspannung', xlabel='f / Hz', ylabel='Ui / U', fignum=True)
 ms.pltext.plotdata(f4, Ui_U_ratio, d_Ui_U_ratio, d_f4, connect=True)
 
 U_I_ratio = U4 / I4
 d_U_I_ratio = U_I_ratio * sqrt((d_U4 / U4)**2 + (d_I4 / I4)**2)
-ms.pltext.initplot(num=5, title='Abbildung 6: Widerstand der Helmholtzspule in Abhängigkeit der Frequenz', xlabel='f', ylabel='Ω')
-[s4, d_s4, i_4, d_i4] = ms.linreg(f4, U_I_ratio, d_U_I_ratio, d_f4, create_graph=True, fit_range=range(9,len(f4)))
+ms.pltext.initplot(num=6, title='Widerstand der Helmholtzspule in Abhängigkeit der Spannungsfrequenz bei Welchselspannung', xlabel='f / Hz', ylabel='R / Ω', fignum=True)
+[s4, d_s4, i_4, d_i4] = ms.linreg(f4, U_I_ratio, d_U_I_ratio, d_f4, plot=True, fit_range=range(10,len(f4)))
 
 L = s4 / (2 * pi)
 d_L = d_s4 / (2 * pi)
@@ -133,6 +135,9 @@ d_α2 = B6_v / sqrt(B5**2 - B6_v**2) * sqrt((d_B6_v / B6_v)**2 + (d_B5 / B5)**2)
 α3 = arccos(B6_h / B5)
 d_α3 = B6_h / sqrt(B5**2 - B6_h**2) * sqrt((d_B6_h / B6_h)**2 + (d_B5 / B5)**2)
 
+B5_ = sqrt(B6_v**2 + B6_h**2)
+d_B5_ = 1 / B5_ * sqrt(B6_v**2 * d_B6_v**2 + B6_h**2 * d_B6_h**2)
+
 α /= sc.degree
 d_α /= sc.degree
 α2 /= sc.degree
@@ -140,10 +145,11 @@ d_α2 /= sc.degree
 α3 /= sc.degree
 d_α3 /= sc.degree
 
-print(ms.val("B5'", sqrt(B6_v**2 + B6_h**2)))
-
 print(ms.val("B6_v", B6_v, d_B6_v))
 print(ms.val("B6_h", B6_h, d_B6_h))
+print(ms.val("B6_v'", B5 * sin(66 * sc.degree)))
+print(ms.val("B6_h'", B5 * cos(66 * sc.degree)))
+print(ms.val("B5'", B5_, d_B5_))
 print(ms.val("α", α, d_α))
 print(ms.val("α2", α2, d_α2))
 print(ms.val("α3", α3, d_α3))
@@ -153,3 +159,6 @@ print(ms.sig("α3", α3, d_α3, 66))
 print()
 
 #ms.plt.show()
+
+for i in range(2, 7):
+  ms.plt.figure(i).savefig('figures/fig' + str(i) +'.pdf', papertype='a4', orientation='landscape', bbox_inches='tight', format='pdf')
