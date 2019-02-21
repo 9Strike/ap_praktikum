@@ -121,6 +121,7 @@ B5 = U5_i / (2 * pi * n_i * A_i * f5)
 d_B5 = B5 * sqrt((d_U5_i / U5_i)**2 + (d_f5 / f5)**2)
 
 print(ms.val("B5", B5, d_B5))
+print(ms.sig("B5,B5_l", B5, d_B5, 4.87e-5))
 print()
 
 # Determination of the angle of inclination of the earths magnetic field
@@ -160,5 +161,5 @@ print()
 
 #ms.plt.show()
 
-for i in range(2, 7):
-  ms.plt.figure(i).savefig('figures/fig' + str(i) +'.pdf', papertype='a4', orientation='landscape', bbox_inches='tight', format='pdf')
+#for i in range(2, 7):
+#  ms.plt.figure(i).savefig('figures/fig' + str(i) +'.pdf', papertype='a4', orientation='landscape', bbox_inches='tight', format='pdf')
