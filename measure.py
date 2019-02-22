@@ -86,7 +86,7 @@ def signval(val, err=0.0):
   valstr = '{:.{digits}e}'.format(val, digits=sdigits)
   return [valstr, errstr]
 
-def val(name, val, err=0.0):
+def val(name, val, err=0.0, unit='', prefix=True):
   """
   Parameters
 
@@ -98,22 +98,32 @@ def val(name, val, err=0.0):
 
   string, format: "name = val ± err" with two significant digits
   """
+  unitPrefixes = "kMGTPEZYyzafpnμm"
+
   out = ''
   if name != '':
     out += name + ' = '
   
-  valstr, errstr, expstr = sigval(val, err)
+  valstr, errstr, expstr = sigval(val, err, unit != '' and prefix)
 
-  if err != 0.0 and expstr[0] != '0':
+  if err != 0.0 and (expstr[0] != '0' or unit != ''):
     out += '('
   out += valstr
   if err != 0.0:
     out += ' ± ' + errstr
-  if err != 0.0 and expstr[0] != '0':
-    out += ')e' + expstr
-  elif expstr[0] != '0':
-    out += 'e' + expstr
-  
+  if err != 0.0 and (expstr[0] != '0' or unit != ''):
+    out += ')'
+  if expstr[0] != '0':
+    exp = int(expstr)
+    if unit != '' and prefix and abs(exp) <= 3 * len(unitPrefixes) / 2:
+      out += ' ' + unitPrefixes[exp // 3] + unit
+    else:
+      out += 'e' + expstr
+      if unit != '':
+        out += ' ' + unit
+  else:
+    out += ' ' + unit
+
   return out
 
 def lst(val, err=[], name=''):
