@@ -1,7 +1,8 @@
-### measure libraby version 1.8.7
+### measure libraby version 1.8.8
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+from sigval import sigval
 
 # Settings
 linreg_change = 0.00001 # min relative change per step to end linear regression
@@ -98,12 +99,21 @@ def val(name, val, err=0.0):
   string, format: "name = val ± err" with two significant digits
   """
   out = ''
-  if (name != ''):
+  if name != '':
     out += name + ' = '
-  tmp = signval(val, err)
-  out += tmp[0]
-  if (tmp[1] != ''):
-    out += ' ± ' + tmp[1]
+  
+  valstr, errstr, expstr = sigval(val, err)
+
+  if err != 0.0 and expstr[0] != '0':
+    out += '('
+  out += valstr
+  if err != 0.0:
+    out += ' ± ' + errstr
+  if err != 0.0 and expstr[0] != '0':
+    out += ')e' + expstr
+  elif expstr[0] != '0':
+    out += 'e' + expstr
+  
   return out
 
 def lst(val, err=[], name=''):
