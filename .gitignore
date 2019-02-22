@@ -4,10 +4,6 @@
 # vscode
 /.vscode
 
-# Extension folder and module, coming soon
-/ext
-/sigval.so
-
 # Local folders for caching figures and store measured data
 /figures
 /data
