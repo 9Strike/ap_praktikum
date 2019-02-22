@@ -18,6 +18,9 @@ int isDigit(char c);
 int getDigit(char c);
 
 void _sigval(double val, double err, char* valstr, char* errstr, char* expstr) {
+  _sigval_fix(val, err, 0, valstr, errstr, expstr);
+}
+void _sigval_fix(double val, double err, int fix, char* valstr, char* errstr, char* expstr) {
   // Check for invalid uncertainty
   if (err < 0)
     return;
@@ -32,15 +35,26 @@ void _sigval(double val, double err, char* valstr, char* errstr, char* expstr) {
     // get Exponent
     sprintf(valstr, "%.0e", val);
     int valExp = atoi(valstr + 2);
-    sprintf(expstr, "%i", valExp);
 
     // Round and get cutted string
     val = dround(val, -valExp + d);
     dtostr(val, d, valstr);
 
+    // Shift
+    int fixShift = 0;
+    if (valExp > -3 && valExp < 3) {
+      fixShift = valExp;
+      shiftPoint(valstr, -fixShift);
+      valExp = 0;
+    }
+    else {
+      shiftPoint(valstr, 0);
+    }
+
     // Cut the exponent
     valstr[2 + d] = '\0';
     errstr[0] = '\0';
+    sprintf(expstr, "%i", valExp);
 
     // Add sign if val < 0 at the beginning
     if (sign && val != 0) {
@@ -68,6 +82,7 @@ void _sigval(double val, double err, char* valstr, char* errstr, char* expstr) {
   dtostr(val, d, valstr);
   dtostr(err, 1, errstr);
 
+  // Round to first nonzero place of err
   if (getDigit(errstr[0]) > 2) {
     --shift; --d;
     val = dround(val, shift);
@@ -77,15 +92,26 @@ void _sigval(double val, double err, char* valstr, char* errstr, char* expstr) {
   }
 
   // Shift errstr, so the exponend matches val
-  int expIsLow = valExp > -3 && valExp < 3;
-  if (expIsLow) {
-    shiftPoint(valstr, -valExp);
-    shiftPoint(errstr, -valExp + d_exp);
+  int multDigitsbp;
+  int fixShift = 0;
+  if (fix) {
+    fixShift = (valExp % 3 + (valExp < 0 ? 3 : 0)) % 3;
+    shiftPoint(valstr, -fixShift);
+    shiftPoint(errstr, -fixShift + d_exp);
+    valExp -= fixShift;
+    multDigitsbp = fixShift != 0;
+  }
+  else if (valExp > -3 && valExp < 3) {
+    fixShift = valExp;
+    shiftPoint(valstr, -fixShift);
+    shiftPoint(errstr, -fixShift + d_exp);
+    multDigitsbp = valExp >= 0 && valExp < 3;
     valExp = 0;
   }
   else {
     shiftPoint(valstr, 0);
     shiftPoint(errstr, d_exp);
+    multDigitsbp = 0;
   }
 
   // Cut the exponent and write it seperatly in expstr
@@ -98,7 +124,7 @@ void _sigval(double val, double err, char* valstr, char* errstr, char* expstr) {
     else if (errstr[i] == 'e')
       break;
   }
-  valstr[c + expIsLow * d_exp + 1] = '\0';
+  valstr[c + multDigitsbp * fixShift + 1] = '\0';
   errstr[c + 1] = '\0';
   sprintf(expstr, "%i", valExp);
 
