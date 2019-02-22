@@ -90,8 +90,8 @@ B1_ = (8 / sqrt(125)) * sc.mu_0 * I1 * n_h / r_h
 d_B1_ = (8 / sqrt(125)) * sc.mu_0 * d_I1 * n_h / r_h
 
 print(ms.val("s1", s1, d_s1))
-print(ms.val("B1", B1, d_B1))
-print(ms.val("B1'", B1_, d_B1_))
+print(ms.val("B1", B1, d_B1, unit='T'))
+print(ms.val("B1'", B1_, d_B1_, unit='T'))
 print(ms.sig("B1,B1'", B1, d_B1, B1_, d_B1_))
 print()
 
@@ -113,14 +113,14 @@ L = s4 / (2 * pi)
 d_L = d_s4 / (2 * pi)
 
 print(ms.val("s4", s4, d_s4))
-print(ms.val("L", L, d_L))
+print(ms.val("L", L, d_L, unit='H'))
 print()
 
 # Determination of the absolute value of the earths magnetic field
 B5 = U5_i / (2 * pi * n_i * A_i * f5)
 d_B5 = B5 * sqrt((d_U5_i / U5_i)**2 + (d_f5 / f5)**2)
 
-print(ms.val("B5", B5, d_B5))
+print(ms.val("B5", B5, d_B5, unit='T'))
 print(ms.sig("B5,B5_l", B5, d_B5, 4.87e-5))
 print()
 
@@ -146,14 +146,14 @@ d_α2 /= sc.degree
 α3 /= sc.degree
 d_α3 /= sc.degree
 
-print(ms.val("B6_v", B6_v, d_B6_v))
-print(ms.val("B6_h", B6_h, d_B6_h))
-print(ms.val("B6_v'", B5 * sin(66 * sc.degree)))
-print(ms.val("B6_h'", B5 * cos(66 * sc.degree)))
-print(ms.val("B5'", B5_, d_B5_))
-print(ms.val("α", α, d_α))
-print(ms.val("α2", α2, d_α2))
-print(ms.val("α3", α3, d_α3))
+print(ms.val("B6_v", B6_v, d_B6_v, unit='T'))
+print(ms.val("B6_h", B6_h, d_B6_h, unit='T'))
+print(ms.val("B6_v'", B5 * sin(66 * sc.degree), unit='T'))
+print(ms.val("B6_h'", B5 * cos(66 * sc.degree), unit='T'))
+print(ms.val("B5'", B5_, d_B5_, unit='T'))
+print(ms.val("α", α, d_α, unit='°', prefix=False))
+print(ms.val("α2", α2, d_α2, unit='°', prefix=False))
+print(ms.val("α3", α3, d_α3, unit='°', prefix=False))
 print(ms.sig("α", α, d_α, 66))
 print(ms.sig("α2", α2, d_α2, 66))
 print(ms.sig("α3", α3, d_α3, 66))
