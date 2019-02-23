@@ -92,26 +92,30 @@ void _sigval_fix(double val, double err, int fix, char* valstr, char* errstr, ch
   }
 
   // Shift errstr, so the exponend matches val
-  int multDigitsbp;
+  int multDigitsbp_val;
+  int multDigitsbp_err;
   int fixShift = 0;
   if (fix) {
     fixShift = (valExp % 3 + (valExp < 0 ? 3 : 0)) % 3;
     shiftPoint(valstr, -fixShift);
     shiftPoint(errstr, -fixShift + d_exp);
     valExp -= fixShift;
-    multDigitsbp = fixShift != 0;
+    multDigitsbp_val = fixShift > 0;
+    multDigitsbp_err = fixShift - d_exp > 0;
   }
   else if (valExp > -3 && valExp < 3) {
     fixShift = valExp;
     shiftPoint(valstr, -fixShift);
     shiftPoint(errstr, -fixShift + d_exp);
-    multDigitsbp = valExp >= 0 && valExp < 3;
+    multDigitsbp_val = valExp > 0;
+    multDigitsbp_err = fixShift - d_exp > 0;
     valExp = 0;
   }
   else {
     shiftPoint(valstr, 0);
     shiftPoint(errstr, d_exp);
-    multDigitsbp = 0;
+    multDigitsbp_val = 0;
+    multDigitsbp_err = -d_exp > 0;
   }
 
   // Cut the exponent and write it seperatly in expstr
@@ -124,7 +128,7 @@ void _sigval_fix(double val, double err, int fix, char* valstr, char* errstr, ch
     else if (errstr[i] == 'e')
       break;
   }
-  valstr[c + multDigitsbp * fixShift + 1] = '\0';
+  valstr[c + multDigitsbp_val * fixShift - multDigitsbp_err * (fixShift - d_exp) + 1] = '\0';
   errstr[c + 1] = '\0';
   sprintf(expstr, "%i", valExp);
 
