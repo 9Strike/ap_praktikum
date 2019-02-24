@@ -162,4 +162,6 @@ ms.plt.plot(n4_gp, f4_g)
 ms.plt.plot(n4_gp, f4_p)
 ms.plt.legend(["Gauss fit", "Poisson fit"])
 
-#ms.plt.show()
+ms.pltext.savefigs('figures')
+
+ms.plt.show()
