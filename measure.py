@@ -116,7 +116,10 @@ def val(name, val, err=0.0, unit='', prefix=True):
   if expstr[0] != '0':
     exp = int(expstr)
     if unit != '' and prefix and abs(exp) <= 3 * len(unitPrefixes) / 2:
-      out += ' ' + unitPrefixes[exp // 3] + unit
+      p = exp // 3
+      if p > 0:
+        p -= 1
+      out += ' ' + unitPrefixes[p] + unit
     else:
       out += 'e' + expstr
       if unit != '':
@@ -270,6 +273,10 @@ class pltext:
       plt.plot(x, y, color=color)
     if (label != ''):
       plt.legend()
+  
+  def savefigs(path):
+    for i in plt.get_fignums():
+      plt.figure(i).savefig(path + '/fig' + str(i) +'.pdf', papertype='a4', orientation='landscape', bbox_inches='tight', format='pdf')
 
 def linreg(x, y, dy, dx=[], fit_range=None, plot=False, graphname='', legend=False):
   if (fit_range == None):
