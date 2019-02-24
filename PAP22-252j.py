@@ -17,12 +17,12 @@ T0 = 8 * cs.minute
 T_Ag = 400
 T_In = 50 * cs.minute
 
-n0 = np.loadtxt('data/PAP22/252_1j.dat', usecols=[1], unpack=True)
-n_Ag_1 = np.loadtxt('data/PAP22/252_2j.dat', usecols=[1], unpack=True)
-n_Ag_2 = np.loadtxt('data/PAP22/252_3j.dat', usecols=[1], unpack=True)
-n_Ag_3 = np.loadtxt('data/PAP22/252_4j.dat', usecols=[1], unpack=True)
-n_Ag_4 = np.loadtxt('data/PAP22/252_5j.dat', usecols=[1], unpack=True)
-n_In = np.loadtxt('data/PAP22/252_6j.dat', usecols=[1], unpack=True)
+n0 = np.loadtxt('data/252/252_1j.dat', usecols=[1], unpack=True)
+n_Ag_1 = np.loadtxt('data/252/252_2j.dat', usecols=[1], unpack=True)
+n_Ag_2 = np.loadtxt('data/252/252_3j.dat', usecols=[1], unpack=True)
+n_Ag_3 = np.loadtxt('data/252/252_4j.dat', usecols=[1], unpack=True)
+n_Ag_4 = np.loadtxt('data/252/252_5j.dat', usecols=[1], unpack=True)
+n_In = np.loadtxt('data/252/252_6j.dat', usecols=[1], unpack=True)
 
 # Background radiation
 n0_m = ms.mv(n0 / ΔT0)

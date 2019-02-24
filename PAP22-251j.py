@@ -78,7 +78,7 @@ def p_pdf(k, μ, A):
   return A * (μ**k / gamma(k + 1)) * exp(-μ)
 
 # 1.Determination of the statistics
-n3, f3 = np.loadtxt('data/PAP22/251_1j.dat', unpack=True)
+n3, f3 = np.loadtxt('data/251/251_1j.dat', unpack=True)
 d_f3 = sqrt(f3)
 
 [μ3_g, σ3_g, A3_g], pcov_g = curve_fit(g_pdf, n3[1:-2], f3[1:-2], sigma=d_f3[1:-2], p0=[25, 5, 2000])
@@ -121,7 +121,7 @@ ms.plt.plot(n3_gp, f3_p)
 ms.plt.legend(["Gauss fit", "Poisson fit"])
 
 # 2.Determination of the statistics
-n4, f4 = np.loadtxt('data/PAP22/251_2j.dat', unpack=True)
+n4, f4 = np.loadtxt('data/251/251_2j.dat', unpack=True)
 d_f4 = sqrt(f4)
 
 [μ4_g, σ4_g, A4_g], _ = curve_fit(g_pdf, n4[:-2], f4[:-2], sigma=d_f4[:-2], p0=[4, 1.5, 4000])
