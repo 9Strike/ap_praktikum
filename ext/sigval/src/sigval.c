@@ -18,9 +18,6 @@ int isDigit(char c);
 int getDigit(char c);
 
 void _sigval(double val, double err, char* valstr, char* errstr, char* expstr) {
-  _sigval_fix(val, err, 0, valstr, errstr, expstr);
-}
-void _sigval_fix(double val, double err, int fix, char* valstr, char* errstr, char* expstr) {
   // Check for invalid uncertainty
   if (err < 0)
     return;
@@ -95,15 +92,7 @@ void _sigval_fix(double val, double err, int fix, char* valstr, char* errstr, ch
   int multDigitsbp_val;
   int multDigitsbp_err;
   int fixShift = 0;
-  if (fix) {
-    fixShift = (valExp % 3 + (valExp < 0 ? 3 : 0)) % 3;
-    shiftPoint(valstr, -fixShift);
-    shiftPoint(errstr, -fixShift + d_exp);
-    valExp -= fixShift;
-    multDigitsbp_val = fixShift > 0;
-    multDigitsbp_err = fixShift - d_exp > 0;
-  }
-  else if (valExp > -3 && valExp < 3) {
+  if (valExp > -3 && valExp < 3) {
     fixShift = valExp;
     shiftPoint(valstr, -fixShift);
     shiftPoint(errstr, -fixShift + d_exp);
@@ -117,6 +106,214 @@ void _sigval_fix(double val, double err, int fix, char* valstr, char* errstr, ch
     multDigitsbp_val = 0;
     multDigitsbp_err = -d_exp > 0;
   }
+
+  // Cut the exponent and write it seperatly in expstr
+  int c = 0;
+  for (int i = 0; i < strlen(errstr); ++i) {
+    if (getDigit(errstr[i]) > 0)
+      c = i;
+    else if (errstr[i] == '.')
+      c = i - 1;
+    else if (errstr[i] == 'e')
+      break;
+  }
+  valstr[c + multDigitsbp_val * fixShift - multDigitsbp_err * (fixShift - d_exp) + 1] = '\0';
+  errstr[c + 1] = '\0';
+  sprintf(expstr, "%i", valExp);
+
+  // Add sign if val < 0 at the beginning
+  if (sign && val != 0) {
+    char val__[0x40];
+    strcpy(val__, (char*)"-");
+    strcat(val__, valstr);
+    strcpy(valstr, val__);
+  }
+}
+void _sigval_fix(double val, double err, double fixExp, char* valstr, char* errstr, char* expstr) {
+    // Check for invalid uncertainty
+  if (err < 0)
+    return;
+  // Check for sign
+  int sign = val < 0;
+  if (sign)
+    val = -val;
+  // Check for zero uncertainty
+  if (err == 0.0) {
+    const int d = 3;
+
+    // get Exponent
+    sprintf(valstr, "%.0e", val);
+    int valExp = atoi(valstr + 2);
+
+    // Round and get cutted string
+    val = dround(val, -valExp + d);
+    dtostr(val, d, valstr);
+
+    // Shift
+    int fixShift = 0;
+    if (valExp > -3 && valExp < 3) {
+      fixShift = valExp;
+      shiftPoint(valstr, -fixShift);
+      valExp = 0;
+    }
+    else {
+      shiftPoint(valstr, 0);
+    }
+
+    // Cut the exponent
+    valstr[2 + d] = '\0';
+    errstr[0] = '\0';
+    sprintf(expstr, "%i", valExp);
+
+    // Add sign if val < 0 at the beginning
+    if (sign && val != 0) {
+      char val__[0x40];
+      strcpy(val__, (char*)"-");
+      strcat(val__, valstr);
+      strcpy(valstr, val__);
+    }
+    return;
+  }
+  // Get exponents
+  sprintf(valstr, "%.0e", val);
+  sprintf(errstr, "%.0e", err);
+  int valExp = atoi(valstr + 2);
+  int errExp = atoi(errstr + 2);
+
+  // Round to second nonzero place of err
+  int d_exp = valExp - errExp;
+  int shift = -valExp + d_exp + 1;
+  val = dround(val, shift);
+  err = dround(err, shift);
+
+  // Get cutted strings
+  int d = MAX(0, d_exp + 1);
+  dtostr(val, d, valstr);
+  dtostr(err, 1, errstr);
+
+  // Round to first nonzero place of err
+  if (getDigit(errstr[0]) > 2) {
+    --shift; --d;
+    val = dround(val, shift);
+    err = dround(err, shift);
+    dtostr(val, d, valstr);
+    dtostr(err, 0, errstr);
+  }
+
+  // Shift errstr, so the exponend matches val
+  int multDigitsbp_val;
+  int multDigitsbp_err;
+  int fixShift = 0;
+  fixShift = valExp - fixExp;
+  shiftPoint(valstr, -fixShift);
+  shiftPoint(errstr, -fixShift + d_exp);
+  valExp -= fixShift;
+  multDigitsbp_val = fixShift > 0;
+  multDigitsbp_err = fixShift - d_exp > 0;
+
+  // Cut the exponent and write it seperatly in expstr
+  int c = 0;
+  for (int i = 0; i < strlen(errstr); ++i) {
+    if (getDigit(errstr[i]) > 0)
+      c = i;
+    else if (errstr[i] == '.')
+      c = i - 1;
+    else if (errstr[i] == 'e')
+      break;
+  }
+  valstr[c + multDigitsbp_val * fixShift - multDigitsbp_err * (fixShift - d_exp) + 1] = '\0';
+  errstr[c + 1] = '\0';
+  sprintf(expstr, "%i", valExp);
+
+  // Add sign if val < 0 at the beginning
+  if (sign && val != 0) {
+    char val__[0x40];
+    strcpy(val__, (char*)"-");
+    strcat(val__, valstr);
+    strcpy(valstr, val__);
+  }
+}
+void _sigval_fix_mod3(double val, double err, char* valstr, char* errstr, char* expstr) {
+  // Check for invalid uncertainty
+  if (err < 0)
+    return;
+  // Check for sign
+  int sign = val < 0;
+  if (sign)
+    val = -val;
+  // Check for zero uncertainty
+  if (err == 0.0) {
+    const int d = 3;
+
+    // get Exponent
+    sprintf(valstr, "%.0e", val);
+    int valExp = atoi(valstr + 2);
+
+    // Round and get cutted string
+    val = dround(val, -valExp + d);
+    dtostr(val, d, valstr);
+
+    // Shift
+    int fixShift = 0;
+    if (valExp > -3 && valExp < 3) {
+      fixShift = valExp;
+      shiftPoint(valstr, -fixShift);
+      valExp = 0;
+    }
+    else {
+      shiftPoint(valstr, 0);
+    }
+
+    // Cut the exponent
+    valstr[2 + d] = '\0';
+    errstr[0] = '\0';
+    sprintf(expstr, "%i", valExp);
+
+    // Add sign if val < 0 at the beginning
+    if (sign && val != 0) {
+      char val__[0x40];
+      strcpy(val__, (char*)"-");
+      strcat(val__, valstr);
+      strcpy(valstr, val__);
+    }
+    return;
+  }
+  // Get exponents
+  sprintf(valstr, "%.0e", val);
+  sprintf(errstr, "%.0e", err);
+  int valExp = atoi(valstr + 2);
+  int errExp = atoi(errstr + 2);
+
+  // Round to second nonzero place of err
+  int d_exp = valExp - errExp;
+  int shift = -valExp + d_exp + 1;
+  val = dround(val, shift);
+  err = dround(err, shift);
+
+  // Get cutted strings
+  int d = MAX(0, d_exp + 1);
+  dtostr(val, d, valstr);
+  dtostr(err, 1, errstr);
+
+  // Round to first nonzero place of err
+  if (getDigit(errstr[0]) > 2) {
+    --shift; --d;
+    val = dround(val, shift);
+    err = dround(err, shift);
+    dtostr(val, d, valstr);
+    dtostr(err, 0, errstr);
+  }
+
+  // Shift errstr, so the exponend matches val
+  int multDigitsbp_val;
+  int multDigitsbp_err;
+  int fixShift = 0;
+  fixShift = (valExp % 3 + (valExp < 0 ? 3 : 0)) % 3;
+  shiftPoint(valstr, -fixShift);
+  shiftPoint(errstr, -fixShift + d_exp);
+  valExp -= fixShift;
+  multDigitsbp_val = fixShift > 0;
+  multDigitsbp_err = fixShift - d_exp > 0;
 
   // Cut the exponent and write it seperatly in expstr
   int c = 0;
