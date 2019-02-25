@@ -158,7 +158,7 @@ def lst(val, err=[], name=''):
     out.append(name.rjust(pos))
   for i in range(len(val)):
     tmp = signval(val[i], err[i])
-    tmp2 =  tmp[0].ljust(valmaxlen)
+    tmp2 = tmp[0].ljust(valmaxlen)
     if (tmp[1] != ''):
       tmp2 += ' ± ' + tmp[1].ljust(errmaxlen)
     elif (errmaxlen != 0):
@@ -273,7 +273,9 @@ class pltext:
       plt.plot(x, y, color=color)
     if (label != ''):
       plt.legend()
+    return plot
   
+  @staticmethod
   def savefigs(path):
     for i in plt.get_fignums():
       plt.figure(i).savefig(path + '/fig' + str(i) +'.pdf', papertype='a4', orientation='landscape', bbox_inches='tight', format='pdf')
@@ -306,11 +308,12 @@ def linreg(x, y, dy, dx=[], fit_range=None, plot=False, graphname='', legend=Fal
   else:
     g = iter0[0]
     g_old = g * (1 - 2 * linreg_change)
+    dy_ = dy
     while (abs(1 - g_old / g) >= linreg_change):
       g_old = g
-      dy = np.sqrt((g * dx)**2 + dy**2)
-      g = linreg_iter(x, y, dy)[0]
-    result = linreg_iter(x, y, dy)
+      dy_ = np.sqrt((g * dx)**2 + dy_**2)
+      g = linreg_iter(x, y, dy_)[0]
+    result = linreg_iter(x, y, dy_)
   if (plot):
     [g, dg, b, db] = result
     min_x = np.argmin(x)
@@ -318,18 +321,24 @@ def linreg(x, y, dy, dx=[], fit_range=None, plot=False, graphname='', legend=Fal
     xint = [x[min_x] - dx[min_x], x[max_x] + dx[max_x]]
     yfit = [g * xint[i] + b for i in range(2)]
     yerr = [(g + dg) * xint[i] + (b - db) for i in range(2)]
-    fitfunc = plt.plot(xint, yfit, marker='')
-    color = fitfunc[0].get_color()
+    data_plot = pltext.plotdata(x=x, y=y, dy=dy, dx=dx, label=graphname)
+    color = data_plot[0].get_color()
+    left, right = plt.xlim()
+    top, bottom = plt.ylim()
+    plt.plot(xint, yfit, marker='', color=color)
     plt.plot(xint, yerr, marker='', linestyle='dashed', color=color)
-    pltext.plotdata(x=x, y=y, dy=dy, dx=dx, label=graphname, color=color)
+    plt.xlim(left, right)
+    plt.ylim(top, bottom)
     if (legend):
       plt.legend(['Fit', 'Fit uncertainty'])
     elif (graphname != ''):
       plt.legend()
   return result
 
-def expreg(x,y,dy,dx=[],plot=True):
-  expo,dexpo,_yitc,_dyitc = linreg(x,np.log(y),dy/y,dx)
+def expreg(x, y, dy, dx=[], plot=True):
+  if dx == []:
+    dx = np.zeros(len(x))
+  expo, dexpo, _yitc, _dyitc = linreg(x, np.log(y), dy/y, dx)
   yitc = exp(_yitc)
   dyitc = yitc * _dyitc
   result = [expo,dexpo,yitc,dyitc]
