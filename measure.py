@@ -195,8 +195,8 @@ def sig(name, val1, err1, val2, err2=0.0, perc=False):
   ### deprecated, use dev instead
   return dev(val1,err1,val2,err2,name=name,perc=perc)
 
-def dev(val1,err1,val2,err2=0.0,name='',perc=False):
-  def get_sig(nominator,denominator):
+def dev(val1, err1, val2, err2=0.0, name='', perc=False):
+  def get_sig(nominator, denominator):
     if (nominator == 0.0):
       sigstr = '0'
     elif (denominator == 0.0):
