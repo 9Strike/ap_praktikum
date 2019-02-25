@@ -5,7 +5,7 @@
 
 void _sigval(double val, double err, char* valstr, char* errstr, char* expstr);
 void _sigval_fix(double val, double err, double fixExp, char* valstr, char* errstr, char* expstr);
-void _sigval_fix_mod3(double val, double err, char* valstr, char* errstr, char* expstr);
+void _sigval_fix_mul3(double val, double err, char* valstr, char* errstr, char* expstr);
 
 static PyObject* sigval(PyObject* self, PyObject* args) {
   double val;
@@ -16,13 +16,13 @@ static PyObject* sigval(PyObject* self, PyObject* args) {
   char errstr[0x40];
   char expstr[0x40];
 
-  if (!PyArg_ParseTuple(args, "dd|i", &val, &err, &fix, &fixExp)) {
+  if (!PyArg_ParseTuple(args, "dd|i|i", &val, &err, &fix, &fixExp)) {
     return NULL;
   }
   if (fix && fixExp != INT_MIN)
     _sigval_fix(val, err, fixExp, valstr, errstr, expstr);
   else if (fix)
-    _sigval_fix_mod3(val, err, valstr, errstr, expstr);
+    _sigval_fix_mul3(val, err, valstr, errstr, expstr);
   else _sigval(val, err, valstr, errstr, expstr);
   return Py_BuildValue("sss", valstr, errstr, expstr);
 }

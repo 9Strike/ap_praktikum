@@ -233,7 +233,7 @@ void _sigval_fix(double val, double err, double fixExp, char* valstr, char* errs
     strcpy(valstr, val__);
   }
 }
-void _sigval_fix_mod3(double val, double err, char* valstr, char* errstr, char* expstr) {
+void _sigval_fix_mul3(double val, double err, char* valstr, char* errstr, char* expstr) {
   // Check for invalid uncertainty
   if (err < 0)
     return;
