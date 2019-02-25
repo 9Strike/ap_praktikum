@@ -15,7 +15,7 @@ n0 = 122 / t0
 
 print(ms.val("n0", n0 * 2 * cs.minute))
 
-# Measurement of β-Radiation absorption, 90Sr, GS 527
+# Measurement of β-Radiation absorption, Sr 90, GS 527
 A_Sr = 74 * cs.kilo
 s_Sr = 60 * cs.milli
 d_s_Sr = 2 * cs.milli
@@ -29,10 +29,10 @@ d_n_Sr = np.append(d_n_Sr[:6] / t1_Sr, d_n_Sr[6:] / t2_Sr)
 d_Sr = np.arange(0.0, 0.3 * cs.milli * len(n_Sr), 0.3 * cs.milli)
 n0_β = 51 / t3_Sr
 
-ms.pltext.initplot(num=1, xlabel='d / mm', ylabel='n / (1/s)')
+ms.pltext.initplot(num=1, xlabel=r'$d$ / mm', ylabel=r'$n$ / (1/s)')
 ms.pltext.plotdata(d_Sr / cs.milli, n_Sr, d_n_Sr)
 
-# Measurement of γ-Radiation absorption, 60Co, UB 595
+# Measurement of γ-Radiation absorption, Co 60, UB 595
 A_Co = 3.7 * cs.mega
 s_Co = 150 * cs.milli
 d_s_Co = 2 * cs.milli
@@ -42,10 +42,10 @@ d_n_Co = sqrt(n_Co) / t_Co
 n_Co = n_Co / t_Co
 d_Co = np.arange(0.0, 5 * cs.milli * len(n_Co), 5 * cs.milli)
 
-ms.pltext.initplot(num=2, xlabel='d / mm', ylabel='n / (1/s)')
+ms.pltext.initplot(num=2, xlabel=r'$d$ / mm', ylabel=r'$n$ / (1/s)')
 ms.pltext.plotdata(d_Co / cs.milli, n_Co, d_n_Co)
 
-# Measurement of γ-Radiation activity, 60Co, UB 595
+# Measurement of γ-Radiation activity, Co 60, UB 595
 t_A = cs.minute
 s_A = npf([50, 105, 190]) * cs.milli
 d_s_A = npf([2, 2, 2]) * cs.milli
@@ -53,7 +53,7 @@ n_A = npf([33865, 8266, 2171])
 d_n_A = sqrt(n_A) / t_A
 n_A = n_A / t_A
 
-# Measurement of α-Radiation absorption and energy, 241Am, AP 15.2
+# Measurement of α-Radiation absorption and energy, Am 241, AP 15.2
 s_c = 4.2 * cs.centi
 σ_c = 2.25 * cs.milli / cs.centi**2
 A_Am = 90 * cs.kilo
@@ -65,7 +65,7 @@ n_Am = npf([13144, 13142, 13131, 12933, 12615, 9883, 7101, 3491, 1680, 451, 239,
 d_n_Am = sqrt(n_Am) / t_Am
 n_Am = n_Am / t_Am
 
-ms.pltext.initplot(num=3, xlabel='p / Pa', ylabel='n / (1/s)')
+ms.pltext.initplot(num=3, xlabel=r'$p$ / Pa', ylabel=r'$n$ / (1/s)')
 ms.pltext.plotdata(p1_Am, n_Am, d_n_Am)
 
 ms.plt.show()

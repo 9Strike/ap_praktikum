@@ -5,7 +5,8 @@ import scipy.constants as cs
 from scipy.optimize import curve_fit
 from scipy.stats import chi2
 
-ms.plt.rc('figure', figsize=(11.69, 8.27))
+ms.plt.rc('text', usetex=True)
+ms.plt.rc('font', family='serif')
 
 # Measured data
 U0 = 520
@@ -52,7 +53,7 @@ for i in range(len(N_Ag)):
 
 t_Ag_fit = np.linspace(t_Ag[0], t_Ag[-1], 1000)
 N_Ag_fit = f_Ag(t_Ag_fit, A1_Ag, λ1_Ag, A2_Ag, λ2_Ag)
-ms.pltext.initplot(num=1, title='Mittelwert der Zerfallsrate A aus 4 Messungen von Ag 108 und Ag 110 zu der Zeit t', xlabel='t / s', ylabel='A / Bq', fignum=True)
+ms.pltext.initplot(num=1, title=r'Mittelwert der Zerfallsrate $A$ aus 4 Messungen von $^{108}$Ag und $^{110}$Ag zu der Zeit $t$', xlabel=r'$t$ / s', ylabel=r'$A$ / Bq', fignum=True)
 ms.pltext.plotdata(t_Ag, N_Ag, d_N_Ag, color='gray')
 ms.plt.plot(t_Ag_fit, N_Ag_fit)
 
@@ -96,7 +97,7 @@ d_n_In = sqrt(d_n_In**2 + d_n0_m**2)
 
 t_In_fit = np.linspace(t_In[0], t_In[-1], 1000)
 n_In_fit = f_In(t_In_fit, A_In, λ_In)
-ms.pltext.initplot(num=2, title='Zerfallsrate A von In 116m (und In 116) in Abhängigkeit zu der Zeit t.', xlabel='t / s', ylabel='A / Bq', fignum=True)
+ms.pltext.initplot(num=2, title=r'Zerfallsrate $A$ von $^{116\rm{m}}$In (und $^{116}$In) in Abhängigkeit zu der Zeit $t$.', xlabel=r'$t$ / s', ylabel=r'$A$ / Bq', fignum=True)
 ms.pltext.plotdata(t_In, n_In, d_n_In, color='gray')
 ms.plt.plot(t_In_fit, n_In_fit)
 
@@ -120,6 +121,5 @@ print("Half life of In116:")
 print(ms.val("τ", τ_In / cs.minute, d_τ_In / cs.minute, unit='min'))
 print(ms.sig("τ", τ_In, d_τ_In, 54.29 * cs.minute))
 
-ms.pltext.savefigs('figures')
-
+ms.pltext.savefigs('figures/252')
 ms.plt.show()

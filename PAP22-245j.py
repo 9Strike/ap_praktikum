@@ -5,8 +5,6 @@ import numpy as np
 import scipy.constants as sc
 from scipy.optimize import curve_fit
 
-ms.plt.rc('figure', figsize=(11.69, 8.27))
-
 # Data of the helmholtz-coil
 d_h = 0.295
 r_h = 0.147
@@ -159,7 +157,5 @@ print(ms.sig("α2", α2, d_α2, 66))
 print(ms.sig("α3", α3, d_α3, 66))
 print()
 
-#ms.plt.show()
-
-#for i in range(2, 7):
-#  ms.plt.figure(i).savefig('figures/fig' + str(i) +'.pdf', papertype='a4', orientation='landscape', bbox_inches='tight', format='pdf')
+ms.pltext.savefigs('figures/245')
+ms.plt.show()
