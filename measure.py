@@ -1,4 +1,4 @@
-### measure libraby version 1.8.8
+### measure libraby version 1.8.9
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
@@ -191,34 +191,76 @@ def tbl(lists, name=''):
       out += lists[i][j].ljust(lens[i]) + suffix
   return out
 
-def sig(name, val1, err1, val2, err2=None, perc=False):
-  if (err2 == None):
-    err2 = 0 * val2
+def sig(name, val1, err1, val2, err2=0.0, perc=False):
+  ### deprecated, use dev instead
+  return dev(val1,err1,val2,err2,name=name,perc=perc)
+
+def dev(val1,err1,val2,err2=0.0,name='',perc=False):
+  def get_sig(nominator,denominator):
+    if (nominator == 0.0):
+      sigstr = '0'
+    elif (denominator == 0.0):
+      sigstr = '∞ '
+    else:
+      sigma = nominator / denominator
+      if (sigma < 0.95):
+        digits = int(abs(np.floor(np.log10(sigma))))
+      elif (sigma < 3.95):
+        digits = 1
+      else:
+        digits = 0
+      sigstr = '{:.{digits}f}'.format(sigma,digits=digits)
+    sigstr += 'σ'
+    return sigstr
+
+  def get_perc(val1,val2,pformat='{:.2f}'):
+    percval = abs(val1 - val2) / val2 * 100
+    percstr = pformat.format(percval) + '%'
+    return percstr
+
+  out = None
   nominator = abs(val1 - val2)
   denominator = np.sqrt(err1**2 + err2**2)
-  if type(nominator) is np.ndarray:
-    return 'todo' # TODO
-  if (nominator == 0.0):
-    sigstr = '0'
-  elif (denominator == 0.0):
-    sigstr = '∞'
-  else:
-    sigma = nominator / denominator
-    if (sigma < 0.95):
-      digits = int(abs(np.floor(np.log10(sigma))))
-    elif (sigma < 3.95):
-      digits = 1
+  if type(val1) is np.ndarray:
+    out = []
+    N = len(val1)
+    if type(denominator) is not np.ndarray:
+      denominator = npfarray([denominator for i in range(N)])
+    if perc:
+      if type(val2) is not np.ndarray:
+        val2 = npfarray([val2 for i in range(N)])
+      tmp = []
+      tmp2 = []
+      sigmaxlen = 0
+      percmaxlen = 0
+      for i in range(N):
+        tmp.append(get_sig(nominator[i],denominator[i]))
+        siglen = len(tmp[i])
+        if (siglen > sigmaxlen):
+          sigmaxlen = siglen
+        tmp2.append(get_perc(val1[i],val2[i]))
+        perclen = len(tmp2[i])
+        if (perclen > percmaxlen):
+          percmaxlen = perclen
+      if (name != ''):
+        adjust = int(np.floor((sigmaxlen/2 + 2 + len(name))))
+        out.append(name.rjust(adjust))
+      for i in range(N):
+        out.append(tmp[i].rjust(sigmaxlen) + ' | ' + tmp2[i].rjust(percmaxlen))
     else:
-      digits = 0
-    sigstr = '{:.{digits}f}'.format(sigma, digits = digits)
-  percstr = ''
-  if (perc == True):
-    percval = abs(val1 - val2) / val2 * 100
-    percstr = ' ; ' + '{:.2g}'.format(percval) + '%'
-  prefix = ''
-  if (name != ''):
-    prefix = name + ': '
-  return prefix + sigstr + 'σ' + percstr
+      if (name != ''):
+        out.append(name)
+      for i in range(N):
+        out.append(get_sig(nominator[i],denominator[i]))
+  else:
+    out = ''
+    prefix = ''
+    if (name != ''):
+      prefix = name + ': '
+    out += prefix + get_sig(nominator,denominator)
+    if perc:
+      out += ' ; ' + get_perc(val1,val2,pformat='{:.2g}')
+  return out
 
 def chi2(yo, dyo, ye, dye=[]):
   if (dye == []):
