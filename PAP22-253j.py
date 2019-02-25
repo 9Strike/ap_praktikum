@@ -116,9 +116,9 @@ s_α = p_H / ms.p0 * a_α + σ_c / (1.43 * cs.milli / cs.centi**2) * cs.centi + 
 d_s_α = sqrt((a_α * d_p_H)**2 + (p_H * d_a_α)**2) / ms.p0
 
 print("Absorption of α-Radiation:")
-print(ms.val("sl", sl_α, d_sl_α))
-print(ms.val("i", i_α, d_i_α))
-print(ms.val("p", p_H, d_p_H))
-print(ms.val("s", s_α, d_s_α))
+print(ms.val("sl", sl_α, d_sl_α, unit='1/(s Pa)', prefix=False))
+print(ms.val("i", i_α, d_i_α, unit='1/s', prefix=False))
+print(ms.val("p", p_H, d_p_H, unit='Pa'))
+print(ms.val("s", s_α, d_s_α, unit='m'))
 
 ms.plt.show()
