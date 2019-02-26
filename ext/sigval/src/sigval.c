@@ -193,12 +193,21 @@ void _sigval_fix(double val, double err, double fixExp, char* valstr, char* errs
 
   // Round to first nonzero place of err
   if (getDigit(errstr[0]) > 2) {
-    --shift; --d;
+    --shift; d = MAX(d - 1, 0);
     val = dround(val, shift);
     err = dround(err, shift);
     dtostr(val, d, valstr);
     dtostr(err, 0, errstr);
   }
+
+  // Update exponents (may change after rounding)
+  char valstr_[0x40];
+  char expstr_[0x40];
+  sprintf(valstr_, "%.0e", val);
+  sprintf(expstr_, "%.0e", err);
+  valExp = atoi(valstr_ + 2);
+  errExp = atoi(expstr_ + 2);
+  d_exp = valExp - errExp;
 
   // Shift errstr, so the exponend matches val
   int multDigitsbp_val;
