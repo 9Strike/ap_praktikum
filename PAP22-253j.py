@@ -47,7 +47,7 @@ n0_β = 51
 d_n0_β = sqrt(n0_β) / t3_β
 n0_β = n0_β / t3_β
 
-n_β = n_β - n0_β
+n_β -= n0_β
 d_n_β = sqrt(d_n_β**2 + d_n0_β**2)
 
 ms.pltext.initplot(num=1, title=titles[0], xlabel=r'$d$ / mm', ylabel=r'$\lg(n)$ / (1/s)', scale='linlog')
@@ -77,6 +77,7 @@ print(ms.val("μ/ρ", μ_ρ_γ * cs.gram / cs.centi**2, d_μ_ρ_γ * cs.gram / c
 print()
 
 # Measurement of γ-Radiation activity, Co 60, UB 595
+l_c = 4 * cs.centi
 t_Aγ = cs.minute
 a_Aγ = npf([50, 105, 190]) * cs.milli
 d_a_Aγ = npf([2, 2, 2]) * cs.milli
@@ -85,10 +86,12 @@ d_n_Aγ = sqrt(n_Aγ) / t_Aγ
 n_Aγ = n_Aγ / t_Aγ
 
 ε_Aγ = 0.04
-A_Aγ = 4 * n_Aγ * a_Aγ**2 / (ε_Aγ * r_c**2)
-d_A_Aγ = A_Aγ * sqrt((d_n_Aγ / (n_Aγ * a_Aγ))**2 + (2 * d_a_Aγ / a_Aγ)**2)
+A1_Aγ = 4 * n_Aγ * a_Aγ**2 / (ε_Aγ * r_c**2)
+d_A1_Aγ = A1_Aγ * sqrt((d_n_Aγ / (n_Aγ * a_Aγ))**2 + (2 * d_a_Aγ / a_Aγ)**2)
+A2_Aγ = 4 * n_Aγ * (a_Aγ + l_c / 2)**2 / (ε_Aγ * r_c**2)
+d_A2_Aγ = A2_Aγ * sqrt((d_n_Aγ / (n_Aγ * a_Aγ))**2 + (2 * d_a_Aγ / (a_Aγ + l_c / 2))**2)
 
-print(ms.tbl([ms.lst(A_Aγ, d_A_Aγ, name='A')]))
+print(ms.tbl([ms.lst(A1_Aγ, d_A1_Aγ, name='A'), ms.lst(A2_Aγ, d_A2_Aγ, name='A')]))
 print()
 
 # Measurement of α-Radiation absorption and energy, Am 241, AP 15.2
@@ -112,7 +115,7 @@ ms.pltext.initplot(num=3, title=titles[2], xlabel=r'$p$ / Pa', ylabel=r'$n$ / (1
 sl_α, d_sl_α, i_α, d_i_α = ms.linreg(p_α, n_α, d_n_α, d_p_α, fit_range=range(5,9), plot=True)
 p_H = (n_α[0] / 2 - i_α) / sl_α
 d_p_H = p_H * sqrt((d_n_α[0]**2 + 4 * d_i_α**2) / (n_α[0] - 2 * i_α)**2 + (d_sl_α / sl_α)**2)
-s_α = p_H / ms.p0 * a_α + σ_c / (1.43 * cs.milli / cs.centi**2) * cs.centi + 0.68 * cs.centi      # => E_α = ( ± ) eV
+s_α = p_H / ms.p0 * a_α + σ_c / (1.43 * cs.milli / cs.centi**2) * cs.centi + 0.68 * cs.centi      # => E_α = (6.0 ± 0.5) MeV
 d_s_α = sqrt((a_α * d_p_H)**2 + (p_H * d_a_α)**2) / ms.p0
 
 print("Absorption of α-Radiation:")
