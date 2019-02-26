@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
+import measure as ms
 from measure import npfarray as npf
 from measure import pi as π
 from measure import sqrt, log10
-import measure as ms
 import numpy as np
 import scipy.constants as cs
 
@@ -91,8 +91,7 @@ d_A1_Aγ = A1_Aγ * sqrt((d_n_Aγ / (n_Aγ * a_Aγ))**2 + (2 * d_a_Aγ / a_Aγ)*
 A2_Aγ = 4 * n_Aγ * (a_Aγ + l_c / 2)**2 / (ε_Aγ * r_c**2)
 d_A2_Aγ = A2_Aγ * sqrt((d_n_Aγ / (n_Aγ * a_Aγ))**2 + (2 * d_a_Aγ / (a_Aγ + l_c / 2))**2)
 
-print(ms.tbl([ms.lst(A1_Aγ, d_A1_Aγ, name='A'), ms.lst(A2_Aγ, d_A2_Aγ, name='A')]))
-print()
+print(ms.tbl([ms.lst(A1_Aγ, d_A1_Aγ, name='A', unit='Bq'), ms.lst(A2_Aγ, d_A2_Aγ, name='A', unit='Bq')]))
 
 # Measurement of α-Radiation absorption and energy, Am 241, AP 15.2
 s_c = 4.2 * cs.centi
@@ -124,4 +123,4 @@ print(ms.val("i", i_α, d_i_α, unit='1/s', prefix=False))
 print(ms.val("p", p_H, d_p_H, unit='Pa'))
 print(ms.val("s", s_α, d_s_α, unit='m'))
 
-ms.plt.show()
+#ms.plt.show()

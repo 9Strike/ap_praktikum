@@ -31,6 +31,8 @@ p0 = 101325 # NIST standard pressure
 g = 9.80984 # Gravitanional acceleration in Heidelberg 
 dg = 2e-5 # Uncertainty of the gravitational acceleration
 
+unitPrefixes = "kMGTPEZYyzafpnμm"
+
 def npfarray(x):
   return np.array(x, dtype='float')
 
@@ -98,7 +100,6 @@ def val(name, val, err=0.0, unit='', prefix=True):
 
   string, format: "name = val ± err" with two significant digits
   """
-  unitPrefixes = "kMGTPEZYyzafpnμm"
 
   out = ''
   if name != '':
@@ -129,7 +130,7 @@ def val(name, val, err=0.0, unit='', prefix=True):
 
   return out
 
-def lst(val, err=[], name=''):
+def lst(val, err=[], name='', unit='', prefix=True, expToFix=None):
   """
   Parameters
 
@@ -141,29 +142,60 @@ def lst(val, err=[], name=''):
 
   array of strings, format "val[i] ± err[i]" with significant digits
   """
+  # Use zeros in case of empty err
   if (err == []):
     err = [0.0 for i in range(len(val))]
+
+  # Use most frequent exponent (multiple of 3)
   N = len(val)
+  lstExp = expToFix
+  if expToFix == None or prefix:
+    exps = np.zeros(N)
+    for i in range(N):
+      _, _, exps[i] = sigval(val[i], err[i], True)
+    exps, counts = np.unique(exps, return_counts=True)
+    lstExp = int(exps[np.argmax(counts)])
+
+  # Determine maximal val and err lengths
   valmaxlen = 0
   errmaxlen = 0
   for i in range(N):
-    tmp = signval(val[i], err[i])
+    tmp = sigval(val[i], err[i], True, lstExp)
     if (len(tmp[0]) > valmaxlen):
       valmaxlen = len(tmp[0])
     if (len(tmp[1]) > errmaxlen):
       errmaxlen = len(tmp[1])
+  
+  # Create and center title
   out = []
+  title = ''
   if (name != ''):
-    pos = int(np.floor((valmaxlen + errmaxlen + 3 + len(name))/2))
-    out.append(name.rjust(pos))
+    title += name
+  if unit != '' or lstExp != 0:
+    title += ' / '
+    if prefix and unit != '':
+      p = lstExp // 3
+      if p > 0:
+        p -= 1
+      title += unitPrefixes[p] + unit
+    else:
+      if unit != '':
+        title += '(' + 'e' + str(lstExp) + ' ' + unit + ')'
+      else:
+        title += 'e' + str(lstExp) + ' ' + unit
+  pos = int(np.floor((valmaxlen + errmaxlen + 3 + len(title))/2))
+  out.append(title.rjust(pos))
+
+  # Write and adjust value error strings to out
   for i in range(len(val)):
-    tmp = signval(val[i], err[i])
+    tmp = sigval(val[i], err[i], True, lstExp)
     tmp2 = tmp[0].ljust(valmaxlen)
     if (tmp[1] != ''):
       tmp2 += ' ± ' + tmp[1].ljust(errmaxlen)
     elif (errmaxlen != 0):
       tmp2 += ''.ljust(errmaxlen + 3)
     out.append(tmp2)
+  
   return out
 
 def tbl(lists, name=''):

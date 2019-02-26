@@ -4,19 +4,26 @@
 #include <python3.7/Python.h>
 
 void _sigval(double val, double err, char* valstr, char* errstr, char* expstr);
-void _sigval_fix(double val, double err, int fix, char* valstr, char* errstr, char* expstr);
+void _sigval_fix(double val, double err, double fixExp, char* valstr, char* errstr, char* expstr);
+void _sigval_fix_mul3(double val, double err, char* valstr, char* errstr, char* expstr);
+
 static PyObject* sigval(PyObject* self, PyObject* args) {
   double val;
   double err;
   int fix = 0;
+  int fixExp = INT_MIN;
   char valstr[0x40];
   char errstr[0x40];
   char expstr[0x40];
 
-  if (!PyArg_ParseTuple(args, "dd|i", &val, &err, &fix)) {
+  if (!PyArg_ParseTuple(args, "dd|i|i", &val, &err, &fix, &fixExp)) {
     return NULL;
   }
-  _sigval_fix(val, err, fix, valstr, errstr, expstr);
+  if (fix && fixExp != INT_MIN)
+    _sigval_fix(val, err, fixExp, valstr, errstr, expstr);
+  else if (fix)
+    _sigval_fix_mul3(val, err, valstr, errstr, expstr);
+  else _sigval(val, err, valstr, errstr, expstr);
   return Py_BuildValue("sss", valstr, errstr, expstr);
 }
 static PyMethodDef svMethods[] = {
