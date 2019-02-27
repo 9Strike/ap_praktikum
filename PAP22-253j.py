@@ -99,7 +99,7 @@ print("Absorption of γ-Radiation")
 print(ms.val("μ", mu_Co * cs.milli, d_mu_Co * cs.milli, unit='1/mm', prefix=False))
 print(ms.val("μ/ρ", mu_rho_Co * cs.gram / cs.centi**2, d_mu_rho_Co * cs.gram / cs.centi**2, unit='cm²/g', prefix=False))
 print(ms.val("E", 1.45e6, 0.05e6, unit='eV'))
-print()1/mm
+print()
 
 # Measurement of γ-Radiation activity, Co 60, UB 595
 A_N_CoA = 3.7 * cs.mega
