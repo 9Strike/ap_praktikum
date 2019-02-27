@@ -392,9 +392,9 @@ def linreg(x, y, dy, dx=[], fit_range=None, plot=False, graphname='', legend=Fal
     [g, dg, b, db] = result
     min_x = np.argmin(x)
     max_x = np.argmax(x)
-    xint = [x[min_x] - dx[min_x], x[max_x] + dx[max_x]]
-    yfit = [g * xint[i] + b for i in range(2)]
-    yerr = [(g + dg) * xint[i] + (b - db) for i in range(2)]
+    xint = np.linspace(x[min_x] - dx[min_x], x[max_x] + dx[max_x], 1000)
+    yfit = g * xint + b
+    yerr = (g + dg) * xint + (b - db)
     data_plot = pltext.plotdata(x=x, y=y, dy=dy, dx=dx, label=graphname)
     color = data_plot[0].get_color()
     left, right = plt.xlim()
@@ -409,23 +409,29 @@ def linreg(x, y, dy, dx=[], fit_range=None, plot=False, graphname='', legend=Fal
       plt.legend()
   return result
 
-def expreg(x, y, dy, dx=[], plot=True):
+def expreg(x, y, dy, dx=[], fit_range=None, plot=True):
+  if fit_range == None:
+    fit_range = range(len(x))
   if dx == []:
     dx = np.zeros(len(x))
-  expo, dexpo, _yitc, _dyitc = linreg(x, np.log(y), dy/y, dx)
+  expo, dexpo, _yitc, _dyitc = linreg(x, np.log(y), dy/y, dx, fit_range=fit_range)
   yitc = exp(_yitc)
   dyitc = yitc * _dyitc
   result = [expo,dexpo,yitc,dyitc]
   if (plot):
     min_x = np.argmin(x)
     max_x = np.argmax(x)
-    xint = np.linspace(x[min_x]-dx[min_x],x[max_x]+dx[max_x],1000)
-    yfit = yitc * exp(expo*xint)
-    yerr = (yitc-dyitc) * exp((expo+dexpo)*xint)
-    fitfunc = plt.plot(xint, yfit, marker='')
-    color = fitfunc[0].get_color()
+    xint = np.linspace(x[min_x] - dx[min_x], x[max_x] + dx[max_x], 1000)
+    yfit = yitc * exp(expo * xint)
+    yerr = (yitc - dyitc) * exp((expo + dexpo) * xint)
+    data_plot = pltext.plotdata(x=x, y=y, dy=dy, dx=dx)
+    color = data_plot[0].get_color()
+    left, right = plt.xlim()
+    top, bottom = plt.ylim()
+    plt.plot(xint, yfit, marker='', color=color)
     plt.plot(xint, yerr, marker='', linestyle='dashed', color=color)
-    pltext.plotdata(x=x, y=y, dy=dy, dx=dx, color=color)
+    plt.xlim(left, right)
+    plt.ylim(top, bottom)
   return result
 
 def lin_yerr(x, dx, y, dy):
