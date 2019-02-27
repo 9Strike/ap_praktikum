@@ -1,4 +1,4 @@
-### measure libraby version 1.8.9
+### measure libraby version 1.8.10
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
@@ -433,6 +433,22 @@ def expreg(x, y, dy, dx=[], fit_range=None, plot=True):
     plt.xlim(left, right)
     plt.ylim(top, bottom)
   return result
+
+def fit(x, y, dy, f, p0=None, fit_range=None, plot=True):
+  if fit_range == None:
+    fit_range = range(len(x))
+  p, d_p = curve_fit(f, x, y, sigma=dy, p0=p0)
+  if plot:
+    xint = np.linspace(np.min(x), np.max(x))
+    yfit = f(xint, *p)
+    data_plot = pltext.plotdata(x, y, dy)
+    color = data_plot[0].get_color()
+    left, right = plt.xlim()
+    top, bottom = plt.ylim()
+    plt.plot(xint, yfit, marker='', color=color)
+    plt.xlim(left, right)
+    plt.ylim(top, bottom)
+  return (*p, *sqrt(np.diag(d_p)))
 
 def lin_yerr(x, dx, y, dy):
   g = linreg(x, y, dx, dy)
