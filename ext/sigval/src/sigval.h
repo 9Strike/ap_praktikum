@@ -16,7 +16,7 @@ static PyObject* sigval(PyObject* self, PyObject* args) {
   char errstr[0x40];
   char expstr[0x40];
 
-  if (!PyArg_ParseTuple(args, "dd|i|i", &val, &err, &fix, &fixExp)) {
+  if (!PyArg_ParseTuple(args, "dd|ii", &val, &err, &fix, &fixExp)) {
     return NULL;
   }
   if (fix && fixExp != INT_MIN)
