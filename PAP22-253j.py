@@ -17,6 +17,8 @@ titles = [
   r'Zählrate $n$ der $\alpha$-Strahlung eines $^{241}$Am Präparats in Abhängigkeit des Luftdrucks $p$'
 ]
 
+print()
+
 # Constants
 rho_Pb = 11.34 * cs.gram / cs.centi**3
 rho_Al = 2.699 * cs.gram / cs.centi**3
@@ -74,6 +76,7 @@ print(ms.val("i", i_Sr, d_i_Sr, unit='1/s', prefix=False))
 print(ms.val("R", R_Sr, d_R_Sr, unit='m'))
 print(ms.val("σ", sigma_Sr * cs.centi**2 / cs.gram, d_sigma_Sr * cs.centi**2 / cs.gram, unit='g/cm²'))
 print(ms.val("E", 2.3e6, 0.8e6, unit='eV'))
+print(ms.sig("E", 2.3e6, 0.8e6, 2.274e6))
 print()
 
 # Measurement of γ-Radiation absorption, Co 60, UB 595
@@ -81,24 +84,24 @@ a_Co = 150 * cs.milli
 d_a_Co = 2 * cs.milli
 t_Co = cs.minute
 n_Co = npf([2447, 1760, 1279, 908, 714, 541, 412, 312, 223, 195, 164])
-d_n_Co = sqrt(n_Co) / t_Co
-n_Co = n_Co / t_Co
+d_n_Co = sqrt(n_Co)
+n_Co = (n_Co / t_Co - n0)
+d_n_Co = sqrt((d_n_Co / t_Co)**2 + d_n0**2)
 d_Co = np.arange(0.0, 5 * cs.milli * len(n_Co), 5 * cs.milli)
-
-n_Co = n_Co - n0
-d_n_Co = sqrt(d_n_Co**2 + d_n0**2)
 
 ms.pltext.initplot(num=3, title=titles[1], xlabel=r'$d$ / mm', ylabel=r'$\lg(n)$ / (1/s)', scale='linlog', fignum=True)
 sl_Co, d_sl_Co, _, _ = ms.expreg(d_Co / cs.milli, n_Co, d_n_Co, plot=True)
 mu_Co = -sl_Co / cs.milli
 d_mu_Co = d_sl_Co / cs.milli
-mu_rho_Co = mu_Co / rho_Pb      # => E_Co = (1.45 ± 0.05) MeV
+mu_rho_Co = mu_Co / rho_Pb      # => E_Co = (1.045 ± 0.05) MeV
 d_mu_rho_Co = d_mu_Co / rho_Pb
 
 print("Absorption of γ-Radiation")
 print(ms.val("μ", mu_Co * cs.milli, d_mu_Co * cs.milli, unit='1/mm', prefix=False))
 print(ms.val("μ/ρ", mu_rho_Co * cs.gram / cs.centi**2, d_mu_rho_Co * cs.gram / cs.centi**2, unit='cm²/g', prefix=False))
 print(ms.val("E", 1.45e6, 0.05e6, unit='eV'))
+print(ms.sig("E", 1.45e6, 0.05e6, 1.173e6))
+print(ms.sig("E", 1.45e6, 0.05e6, 1.333e6))
 print()
 
 # Measurement of γ-Radiation activity, Co 60, UB 595
@@ -108,30 +111,41 @@ T_H_CoA = 5.27 * cs.year
 eps_CoA = 0.04
 rho_abs_CoA = 7.9 * cs.gram / cs.centi**3
 d_abs_CoA = 1.4 * cs.milli
+
 t_CoA = cs.minute
 a_CoA = npf([50, 105, 190]) * cs.milli
 d_a_CoA = npf([2, 2, 2]) * cs.milli
 n_CoA = npf([33865, 8266, 2171])
-d_n_CoA = sqrt(n_CoA) / t_CoA
-n_CoA = n_CoA / t_CoA
+d_n_CoA = sqrt(n_CoA)
+n_CoA = (n_CoA / t_CoA - n0) / eps_CoA
+d_n_CoA = sqrt((d_n_CoA / t_CoA)**2 + d_n0**2) / eps_CoA
+
+print("Activity of γ-Radiation:")
+print(ms.tbl([ms.lst(n_CoA, d_n_CoA, name='n', unit='1/s', prefix=False)]))
 
 mu_abs_CoA = mu_rho_Co * rho_abs_CoA
 d_mu_abs_CoA = d_mu_rho_Co * rho_abs_CoA
-A1_CoA = 4 * n_CoA * a_CoA**2 / (eps_CoA * r_c**2)
-d_A1_CoA = A1_CoA * sqrt((d_n_CoA / (n_CoA * a_CoA))**2 + (2 * d_a_CoA / a_CoA)**2)
-A2_CoA = 4 * n_CoA * (a_CoA + l_c / 2)**2 / (eps_CoA * r_c**2)
-d_A2_CoA = A2_CoA * sqrt((d_n_CoA / (n_CoA * a_CoA))**2 + (2 * d_a_CoA / (a_CoA + l_c / 2))**2)
-A3_CoA = A2_CoA * exp(-mu_abs_CoA * d_abs_CoA)
-d_A3_CoA = A3_CoA * sqrt((d_A2_CoA / A2_CoA)**2 + (d_abs_CoA * d_mu_abs_CoA)**2)
+A_CoA = 4 * n_CoA * a_CoA**2 / r_c**2
+d_A_CoA = A_CoA * sqrt((d_n_CoA / n_CoA)**2 + (2 * d_a_CoA / a_CoA)**2)
+A1_CoA = 4 * n_CoA * (a_CoA + l_c / 2)**2 / r_c**2
+d_A1_CoA = A1_CoA * sqrt((d_n_CoA / n_CoA)**2 + (2 * d_a_CoA / (a_CoA + l_c / 2))**2)
+A2_CoA = A1_CoA * exp(-mu_abs_CoA * d_abs_CoA)
+d_A2_CoA = A2_CoA * sqrt((d_A1_CoA / A1_CoA)**2 + (d_abs_CoA * d_mu_abs_CoA)**2)
 A_l_CoA = A_N_CoA * exp(-ln(2) * T_CoA / T_H_CoA)
 
-print(ms.tbl([ms.lst(A1_CoA, d_A1_CoA, name='A', unit='Bq'),
-              ms.lst(A2_CoA, d_A2_CoA, name='A', unit='Bq'),
-              ms.lst(A3_CoA, d_A3_CoA, name='A', unit='Bq')]))
-print(ms.val("A", A_l_CoA))
-print(ms.tbl([ms.dev(A1_CoA, d_A1_CoA, [A_l_CoA] * 3, name='A'),
-              ms.dev(A2_CoA, d_A2_CoA, [A_l_CoA] * 3, name='A'),
-              ms.dev(A3_CoA, d_A3_CoA, [A_l_CoA] * 3, name='A')]))
+k1_CoA = A1_CoA / A_CoA
+k2_CoA = A2_CoA / A1_CoA
+
+print(ms.tbl([ms.lst(A_CoA, d_A_CoA, name='A', unit='Bq'),
+              ms.lst(A1_CoA, d_A1_CoA, name='A1', unit='Bq'),
+              ms.lst(A2_CoA, d_A2_CoA, name='A2', unit='Bq')]))
+print(ms.tbl([ms.lst(k1_CoA, name='k1'),
+              ms.lst(k2_CoA, name='k2')]))
+print(ms.val("T", T_CoA / cs.year, unit='yr'))
+print(ms.val("A", A_l_CoA, unit='Bq'))
+print(ms.tbl([ms.dev(A_CoA, d_A_CoA, [A_l_CoA] * 3, name='A'),
+              ms.dev(A1_CoA, d_A1_CoA, [A_l_CoA] * 3, name='A'),
+              ms.dev(A2_CoA, d_A2_CoA, [A_l_CoA] * 3, name='A')]))
 
 # Measurement of Am-Radiation absorption and energy, Am 241, AP 15.2
 s_c = 4.2 * cs.centi
@@ -144,13 +158,14 @@ p1_Am = npf([18, 98, 120, 225, 324, 383, 416, 450, 475, 515, 617, 721, 813, 911,
 p2_Am = npf([20, 98, 120, 222, 324, 392, 413, 450, 473, 512, 614, 717, 809, 908, 1009]) * cs.milli * cs.bar
 d_p_Am = cs.milli * cs.bar
 n_Am = npf([13144, 13142, 13131, 12933, 12615, 9883, 7101, 3491, 1680, 451, 239, 205, 229, 225, 212])
-d_n_Am = sqrt(n_Am) / t_Am
-n_Am = n_Am / t_Am
+d_n_Am = sqrt(n_Am)
+n_Am = n_Am / t_Am - n0
+d_n_Am = sqrt((d_n_Am / t_Am)**2 + d_n0**2)
 
 p_Am = npf([0.5 * (p1_Am[i] + p2_Am[i]) for i in range(len(p1_Am))])
 d_p_Am = npf([np.max([0.5 * np.abs(p2_Am[i] - p1_Am[i]), 1]) for i in range(len(p1_Am))])
 
-ms.pltext.initplot(num=4, title=titles[2], xlabel=r'$p$ / Pa', ylabel=r'$n$ / (1/s)', fignum=True)
+ms.pltext.initplot(num=5, title=titles[2], xlabel=r'$p$ / Pa', ylabel=r'$n$ / (1/s)', fignum=True)
 sl_Am, d_sl_Am, i_Am, d_i_Am = ms.linreg(p_Am, n_Am, d_n_Am, d_p_Am, fit_range=range(5,9), plot=True)
 p_H = (n_Am[0] / 2 - i_Am) / sl_Am
 d_p_H = p_H * sqrt((d_n_Am[0]**2 + 4 * d_i_Am**2) / (n_Am[0] - 2 * i_Am)**2 + (d_sl_Am / sl_Am)**2)
@@ -162,5 +177,8 @@ print(ms.val("sl", sl_Am, d_sl_Am, unit='1/(s Pa)', prefix=False))
 print(ms.val("i", i_Am, d_i_Am, unit='1/s', prefix=False))
 print(ms.val("p", p_H, d_p_H, unit='Pa'))
 print(ms.val("s", s_Am, d_s_Am, unit='m'))
+print(ms.val("E", 6.0e6, 0.5e6, unit='eV'))
+print(ms.sig("E", 6.0e6, 0.5e6, 5.48e6))
 
-ms.plt.show()
+#ms.pltext.savefigs('figures/253')
+#ms.plt.show()
