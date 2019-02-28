@@ -152,7 +152,7 @@ def lst(val, err=[], name='', unit='', prefix=True, expToFix=None):
   if expToFix == None or prefix:
     exps = np.zeros(N)
     for i in range(N):
-      _, _, exps[i] = sigval(val[i], err[i], True)
+      _, _, exps[i] = sigval(val[i], err[i])
     exps, counts = np.unique(exps, return_counts=True)
     lstExp = int(exps[np.argmax(counts)])
 
@@ -352,7 +352,7 @@ class pltext:
   @staticmethod
   def savefigs(path):
     for i in plt.get_fignums():
-      plt.figure(i).savefig(path + '/fig' + str(i) +'.pdf', papertype='a4', orientation='landscape', bbox_inches='tight', format='pdf')
+      plt.figure(i).savefig(path + '/fig' + str(i) +'.pdf', papertype='a4', orientation='landscape', bbox_inches='tight', pad_inches=0.3, format='pdf')
 
 def linreg(x, y, dy, dx=[], fit_range=None, plot=False, graphname='', legend=False):
   if (fit_range == None):
