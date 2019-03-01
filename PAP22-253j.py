@@ -163,4 +163,5 @@ print(ms.val("i", i_Am, d_i_Am, unit='1/s', prefix=False))
 print(ms.val("p", p_H, d_p_H, unit='Pa'))
 print(ms.val("s", s_Am, d_s_Am, unit='m'))
 
+ms.pltext.savefigs('figures/253')
 ms.plt.show()
