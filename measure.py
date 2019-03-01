@@ -1,4 +1,4 @@
-### measure libraby version 1.8.10
+### measure libraby version 1.8.11
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
@@ -7,6 +7,7 @@ from sigval import sigval
 # Settings
 linreg_change = 0.00001 # min relative change per step to end linear regression
 minfloat = 1e-80 # replaces zeros in linreg
+linspace_res = 2000 # resolution for nplinspace
 
 # Variables for export
 sqrt = np.sqrt
@@ -35,6 +36,9 @@ unitPrefixes = "kMGTPEZYyzafpnμm"
 
 def npfarray(x):
   return np.array(x, dtype='float')
+
+def nplinspace(start,stop):
+  return np.linspace(start,stop,num=linspace_res,endpoint=True)
 
 def mv(x):
   s = 0.0
@@ -405,7 +409,7 @@ def linreg(x, y, dy, dx=[], fit_range=None, plot=False, graphname='', legend=Fal
     [g, dg, b, db] = result
     min_x = np.argmin(x)
     max_x = np.argmax(x)
-    xint = np.linspace(x[min_x] - dx[min_x], x[max_x] + dx[max_x], 1000)
+    xint = nplinspace(x[min_x] - dx[min_x], x[max_x] + dx[max_x])
     yfit = g * xint + b
     yerr = (g + dg) * xint + (b - db)
     data_plot = pltext.plotdata(x=x, y=y, dy=dy, dx=dx, label=graphname)
