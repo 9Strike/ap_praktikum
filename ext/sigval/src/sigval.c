@@ -348,14 +348,25 @@ void _sigval_fix_mul3(double val, double err, char* valstr, char* errstr, char* 
 }
 
 double dround(double val, int d) {
-  long shiftFactor;
   if (d < 0) {
-    shiftFactor = pow(10, -d);
-    val = round(val / shiftFactor) * shiftFactor;
+    double valToRound = val;
+    for (int i = 0; i < -d; ++i) {
+      valToRound /= 10.0;
+    }
+    val = round(valToRound);
+    for (int i = 0; i < -d; ++i) {
+      val *= 10.0;
+    }
   }
   else {
-    shiftFactor = pow(10, d);
-    val = round(val * shiftFactor) / shiftFactor;
+    double valToRound = val;
+    for (int i = 0; i < d; ++i) {
+      valToRound *= 10.0;
+    }
+    val = round(valToRound);
+    for (int i = 0; i < d; ++i) {
+      val /= 10.0;
+    }
   }
   return val;
 }
