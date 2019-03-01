@@ -334,11 +334,23 @@ class pltext:
 
   @staticmethod
   def plotdata(x, y, dy=[], dx=[], label='', color=None, connect=False):
-    if (dx == []):
-      dx = npfarray([0.0 for i in range(len(x))])
-    if (dy == []):
-      dy = npfarray([0.0 for i in range(len(y))])
-    plot = plt.errorbar(x=x, y=y, yerr=dy, xerr=dx, label=label, color=color, fmt='o', markersize=3, capsize=5)
+    # Do not plot uncertainties if they are zero
+    if all(err == 0.0 for err in dx):
+      dx = []
+    if all(err == 0.0 for err in dy):
+      dy = []
+    
+    # Plot data with errorbars, excluding empty uncertainties
+    if (dx == [] and dy == []):
+      plot = plt.errorbar(x=x, y=y, label=label, color=color, fmt='o', markersize=3, capsize=5)
+    elif (dx == [] and dy != []):
+      plot = plt.errorbar(x=x, y=y, yerr=dy, label=label, color=color, fmt='o', markersize=3, capsize=5)
+    elif (dx != [] and dy == []):
+      plot = plt.errorbar(x=x, y=y, xerr=dx, label=label, color=color, fmt='o', markersize=3, capsize=5)
+    else:
+      plot = plt.errorbar(x=x, y=y, yerr=dy, xerr=dx, label=label, color=color, fmt='o', markersize=3, capsize=5)
+    
+    # Other plot options
     for cap in plot[1]:
       cap.set_markeredgewidth(1)
     if (connect == True):
@@ -351,8 +363,9 @@ class pltext:
   
   @staticmethod
   def savefigs(path):
+    # Save figures in 'path' as figN.pdf, where N is the figures number
     for i in plt.get_fignums():
-      plt.figure(i).savefig(path + '/fig' + str(i) +'.pdf', papertype='a4', orientation='landscape', bbox_inches='tight', format='pdf')
+      plt.figure(i).savefig(path + '/fig' + str(i) +'.pdf', papertype='a4', orientation='landscape', bbox_inches='tight', pad_inches=0.3, format='pdf')
 
 def linreg(x, y, dy, dx=[], fit_range=None, plot=False, graphname='', legend=False):
   if (fit_range == None):
@@ -439,7 +452,7 @@ def fit(x, y, dy, f, p0=None, fit_range=None, plot=True):
     fit_range = range(len(x))
   p, d_p = curve_fit(f, x, y, sigma=dy, p0=p0)
   if plot:
-    xint = np.linspace(np.min(x), np.max(x))
+    xint = np.linspace(np.min(x), np.max(x), 1000)
     yfit = f(xint, *p)
     data_plot = pltext.plotdata(x, y, dy)
     color = data_plot[0].get_color()
