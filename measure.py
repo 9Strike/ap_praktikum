@@ -1,4 +1,4 @@
-### measure libraby version 1.8.11
+### measure libraby version 1.8.12
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
@@ -313,28 +313,33 @@ def chi2_red(yo, dyo, ye, dye=[], dof=0):
 
 class pltext:
   @staticmethod
-  def initplot(num=0, title='', xlabel='', ylabel='', scale='linlin', fignum=False):
-    fig = plt.figure(num)
+  def initplot(num=0, nrows=1, ncols=1, title='', xlabel='', ylabel='', scale='linlin', fignum=False):
+    fig, axs = plt.subplots(nrows=nrows, ncols=ncols)
     if fignum:
-      plt.title('Abbildung ' + str(num) + ': ' + title, fontsize='14')
+      plt.title('Diagramm ' + str(num) + ': ' + title, fontsize='14')
     else:
       plt.title(title, fontsize='14')
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.grid(True, which='both')
+    for ax in np.array([axs]).reshape(-1):
+      ax.set_xlabel(xlabel)
+      ax.set_ylabel(ylabel)
+      ax.grid(True, which='both')
+      if (scale == 'linlin'):
+        ax.ticklabel_format(style='sci', axis='both', scilimits=(-2,3))
+      elif (scale == 'linlog'):
+        ax.set_yscale('log')
+        ax.ticklabel_format(style='sci', axis='x', scilimits=(-2,3))
+      elif (scale == 'loglin'):
+        ax.set_xscale('log')
+        ax.ticklabel_format(style='sci', axis='y', scilimits=(-2,3))
+      elif (scale == 'loglog'):
+        ax.set_yscale('log')
+        ax.set_xscale('log')
     fig.set_size_inches(11.69,8.27)
     plt.tight_layout()
-    if (scale == 'linlin'):
-      plt.ticklabel_format(style='sci', axis='both', scilimits=(-2,3))
-    elif (scale == 'linlog'):
-      plt.yscale('log')
-      plt.ticklabel_format(style='sci', axis='x', scilimits=(-2,3))
-    elif (scale == 'loglin'):
-      plt.xscale('log')
-      plt.ticklabel_format(style='sci', axis='y', scilimits=(-2,3))
-    elif (scale == 'loglog'):
-      plt.yscale('log')
-      plt.xscale('log')
+
+  @staticmethod
+  def set_axis(num):
+    plt.sca(plt.gcf().axes[num])
 
   @staticmethod
   def plotdata(x, y, dy=[], dx=[], label='', color=None, connect=False):
@@ -454,7 +459,10 @@ def expreg(x, y, dy, dx=[], fit_range=None, plot=True):
 def fit(x, y, dy, f, p0=None, fit_range=None, plot=True):
   if fit_range == None:
     fit_range = range(len(x))
-  p, d_p = curve_fit(f, x, y, sigma=dy, p0=p0)
+  x_fit = [x[i] for i in fit_range]
+  y_fit = [y[i] for i in fit_range]
+  dy_fit = [dy[i] for i in fit_range]
+  p, d_p = curve_fit(f, x_fit, y_fit, sigma=dy_fit, p0=p0)
   if plot:
     xint = np.linspace(np.min(x), np.max(x), 1000)
     yfit = f(xint, *p)
@@ -465,7 +473,7 @@ def fit(x, y, dy, f, p0=None, fit_range=None, plot=True):
     plt.plot(xint, yfit, marker='', color=color)
     plt.xlim(left, right)
     plt.ylim(top, bottom)
-  return (*p, *sqrt(np.diag(d_p)))
+  return (p, sqrt(np.diag(d_p)))
 
 def lin_yerr(x, dx, y, dy):
   g = linreg(x, y, dx, dy)
