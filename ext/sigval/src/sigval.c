@@ -30,8 +30,8 @@ void _sigval(double val, double err, char* valstr, char* errstr, char* expstr) {
     const int d = 3;
 
     // get Exponent
-    sprintf(valstr, "%.0e", val);
-    int valExp = atoi(valstr + 2);
+    sprintf(valstr, "%.15e", val);
+    int valExp = atoi(valstr + 18);
 
     // Round and get cutted string
     val = dround(val, -valExp + d);
@@ -63,10 +63,10 @@ void _sigval(double val, double err, char* valstr, char* errstr, char* expstr) {
     return;
   }
   // Get exponents
-  sprintf(valstr, "%.0e", val);
-  sprintf(errstr, "%.0e", err);
-  int valExp = atoi(valstr + 2);
-  int errExp = atoi(errstr + 2);
+  sprintf(valstr, "%.15e", val);
+  sprintf(errstr, "%.15e", err);
+  int valExp = atoi(valstr + 18);
+  int errExp = atoi(errstr + 18);
 
   // Round to second nonzero place of err
   int d_exp = valExp - errExp;
@@ -142,8 +142,8 @@ void _sigval_fix(double val, double err, double fixExp, char* valstr, char* errs
     const int d = 3;
 
     // get Exponent
-    sprintf(valstr, "%.0e", val);
-    int valExp = atoi(valstr + 2);
+    sprintf(valstr, "%.15e", val);
+    int valExp = atoi(valstr + 18);
 
     // Round and get cutted string
     val = dround(val, -valExp + d);
@@ -175,10 +175,10 @@ void _sigval_fix(double val, double err, double fixExp, char* valstr, char* errs
     return;
   }
   // Get exponents
-  sprintf(valstr, "%.0e", val);
-  sprintf(errstr, "%.0e", err);
-  int valExp = atoi(valstr + 2);
-  int errExp = atoi(errstr + 2);
+  sprintf(valstr, "%.15e", val);
+  sprintf(errstr, "%.15e", err);
+  int valExp = atoi(valstr + 18);
+  int errExp = atoi(errstr + 18);
 
   // Round to second nonzero place of err
   int d_exp = valExp - errExp;
@@ -255,8 +255,8 @@ void _sigval_fix_mul3(double val, double err, char* valstr, char* errstr, char* 
     const int d = 3;
 
     // get Exponent
-    sprintf(valstr, "%.0e", val);
-    int valExp = atoi(valstr + 2);
+    sprintf(valstr, "%.15e", val);
+    int valExp = atoi(valstr + 18);
 
     // Round and get cutted string
     val = dround(val, -valExp + d);
@@ -288,10 +288,10 @@ void _sigval_fix_mul3(double val, double err, char* valstr, char* errstr, char* 
     return;
   }
   // Get exponents
-  sprintf(valstr, "%.0e", val);
-  sprintf(errstr, "%.0e", err);
-  int valExp = atoi(valstr + 2);
-  int errExp = atoi(errstr + 2);
+  sprintf(valstr, "%.15e", val);
+  sprintf(errstr, "%.15e", err);
+  int valExp = atoi(valstr + 18);
+  int errExp = atoi(errstr + 18);
 
   // Round to second nonzero place of err
   int d_exp = valExp - errExp;
