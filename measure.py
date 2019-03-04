@@ -316,9 +316,15 @@ class pltext:
   def initplot(num=0, nrows=1, ncols=1, title='', xlabel='', ylabel='', scale='linlin', fignum=False):
     fig, axs = plt.subplots(nrows=nrows, ncols=ncols)
     if fignum:
-      plt.title('Diagramm ' + str(num) + ': ' + title, fontsize='14')
+      if nrows != 1 or ncols != 1:
+        st = fig.suptitle('Diagramm ' + str(num) + ': ' + title, fontsize='14')
+      else:
+        plt.title('Diagramm ' + str(num) + ': ' + title, fontsize='14')
     else:
-      plt.title(title, fontsize='14')
+      if nrows != 1 or ncols != 1:
+        st = fig.suptitle(title, fontsize='14')
+      else:
+        plt.title(title, fontsize='14')
     for ax in np.array([axs]).reshape(-1):
       ax.set_xlabel(xlabel)
       ax.set_ylabel(ylabel)
@@ -335,7 +341,10 @@ class pltext:
         ax.set_yscale('log')
         ax.set_xscale('log')
     fig.set_size_inches(11.69,8.27)
-    plt.tight_layout()
+    fig.tight_layout()
+    if nrows != 1 or ncols != 1:
+      st.set_y(0.97)
+      fig.subplots_adjust(top=0.92)
 
   @staticmethod
   def set_axis(num):
