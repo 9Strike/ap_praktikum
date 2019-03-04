@@ -9,7 +9,10 @@ ms.plt.rc('font', family='serif')
 conv = [lambda s: float(s.replace(',', '.'))]
 
 titles = [
-  r'Zählrate $n$ in Abhängigkeit der Spannung der Röntgenröhre $U$ bei einem konstanten Winkel von 7.5$^\circ$'
+  r'Bestimmung des Grenzwinkels $\beta_G$ durch Extrapolation' '\n' r'des linearen Endes des Grenzspektrums (Zählrate $n$ in Abhängigkeit des Winkels $\beta$).',
+  r'Bestimmung der Lagen der $K_\alpha$, $K_\beta$-Peaks durch Gaussfits an die Zählraten-Winkel-Abhängigkeit des LiF-Kristalls.',
+  r'Zählrate $n$ in Abhängigkeit der Spannung der Röntgenröhre $U$ bei einem konstanten Winkel von 7.5$^\circ$',
+  r'Bestimmung der Lagen der $K_\alpha$, $K_\beta$-Peaks durch Gaussfits an die Zählraten-Winkel-Abhängigkeit des NaCl-Kristalls.'
 ]
 
 # Constants
@@ -26,7 +29,7 @@ d_n1 = sqrt(n1 * t1) / t1
 n1_0 = ms.mv(n1[0:7])
 d_n1_0 = ms.dsto_mv(n1[0:7])
 
-ms.pltext.initplot(num=1, xlabel=r'$\beta$ / °', ylabel=r'$n$ / (1/s)')
+ms.pltext.initplot(num=1, title=titles[0], xlabel=r'$\beta$ / $^\circ$', ylabel=r'$n$ / (1/s)')
 s1, d_s1, b1, d_b1 = ms.linreg(beta1[:20], n1[:20], d_n1[:20], fit_range=range(10, 13), plot=True)
 beta1_G = (n1_0 - b1) / s1
 d_beta1_G = beta1_G * sqrt((d_n1_0**2 + d_b1**2) / (n1_0 - b1)**2 + (d_s1 / s1)**2)
@@ -64,7 +67,7 @@ d_n2_p1 = sqrt(n2_p1 * t_p1) / t_p1
 d_n3_p1 = sqrt(n3_p1 * t_p1) / t_p1
 d_n4_p1 = sqrt(n4_p1 * t_p1) / t_p1
 
-ms.pltext.initplot(num=2, nrows=2, ncols=2, xlabel=r'$\beta$ / $^\circ$', ylabel=r'$n$ / (1/s)')
+ms.pltext.initplot(num=2, nrows=2, ncols=2, title=titles[1], xlabel=r'$\beta$ / $^\circ$', ylabel=r'$n$ / (1/s)')
 ms.pltext.set_axis(0)
 [mu1_p1, sigma1_p1, A1_p1], [d_mu1_p1, d_sigma1_p1, d_A1_p1] = ms.fit(beta1_p1, n1_p1, d_n1_p1, gauss, p0=[9.0, 0.2, 450], plot=True, fit_range=range(3, 7))
 ms.pltext.set_axis(1)
@@ -74,18 +77,18 @@ ms.pltext.set_axis(2)
 ms.pltext.set_axis(3)
 [mu4_p1, sigma4_p1, A4_p1], [d_mu4_p1, d_sigma4_p1, d_A4_p1] = ms.fit(beta4_p1, n4_p1, d_n4_p1, gauss, p0=[20.7, 0.15, 100], plot=True, fit_range=range(4, 9))
 ld1_p1 = 2 * d_LiF * sin(mu1_p1 * cs.degree)
-d_ld1_p1 = 2 * d_LiF * cos(mu1_p1 * cs.degree) * d_mu1_p1 * cs.degree
+d_ld1_p1 = 2 * d_LiF * cos(mu1_p1 * cs.degree) * sigma1_p1 * cs.degree
 ld2_p1 = 2 * d_LiF * sin(mu2_p1 * cs.degree)
-d_ld2_p1 = 2 * d_LiF * cos(mu2_p1 * cs.degree) * d_mu2_p1 * cs.degree
-ld3_p1 = 2 * d_LiF * sin(mu3_p1 * cs.degree)
-d_ld3_p1 = 2 * d_LiF * cos(mu3_p1 * cs.degree) * d_mu3_p1 * cs.degree
-ld4_p1 = 2 * d_LiF * sin(mu4_p1 * cs.degree)
-d_ld4_p1 = 2 * d_LiF * cos(mu4_p1 * cs.degree) * d_mu4_p1 * cs.degree
+d_ld2_p1 = 2 * d_LiF * cos(mu2_p1 * cs.degree) * sigma2_p1 * cs.degree
+ld3_p1 = d_LiF * sin(mu3_p1 * cs.degree)
+d_ld3_p1 = d_LiF * cos(mu3_p1 * cs.degree) * sigma3_p1 * cs.degree
+ld4_p1 = d_LiF * sin(mu4_p1 * cs.degree)
+d_ld4_p1 = d_LiF * cos(mu4_p1 * cs.degree) * sigma4_p1 * cs.degree
 
-print(ms.val("β1", mu1_p1, d_mu1_p1, unit='°', prefix=False))
-print(ms.val("β2", mu2_p1, d_mu2_p1, unit='°', prefix=False))
-print(ms.val("β3", mu3_p1, d_mu3_p1, unit='°', prefix=False))
-print(ms.val("β4", mu4_p1, d_mu4_p1, unit='°', prefix=False))
+print(ms.val("β1", mu1_p1, sigma1_p1, unit='°', prefix=False))
+print(ms.val("β2", mu2_p1, sigma2_p1, unit='°', prefix=False))
+print(ms.val("β3", mu3_p1, sigma3_p1, unit='°', prefix=False))
+print(ms.val("β4", mu4_p1, sigma4_p1, unit='°', prefix=False))
 print(ms.val("Δβ_2", 2 * sqrt(2 * ln(2)) * sigma2_p1, 2 * sqrt(2 * ln(2)) * d_sigma2_p1, unit='°', prefix=False))
 print() 
 print(ms.val("λ1", ld1_p1, d_ld1_p1, unit='m'))
@@ -93,8 +96,12 @@ print(ms.val("λ2", ld2_p1, d_ld2_p1, unit='m'))
 print(ms.val("λ3", ld3_p1, d_ld3_p1, unit='m'))
 print(ms.val("λ4", ld4_p1, d_ld4_p1, unit='m'))
 print()
-print(ms.sig("λ_α", ld2_p1, d_ld2_p1, 71.1e-12, perc=True))
-print(ms.sig("λ_β", ld1_p1, d_ld1_p1, 63.1e-12, perc=True))
+print(ms.sig("λ_α1,l", ld2_p1, d_ld2_p1, 71.1e-12, perc=True))
+print(ms.sig("λ_α2,l", ld4_p1, d_ld4_p1, 71.1e-12, perc=True))
+print(ms.sig("λ_β1,l", ld1_p1, d_ld1_p1, 63.1e-12, perc=True))
+print(ms.sig("λ_β2,l", ld3_p1, d_ld3_p1, 63.1e-12, perc=True))
+print(ms.sig("λ_α", ld2_p1, d_ld2_p1, ld4_p1, d_ld4_p1, perc=True))
+print(ms.sig("λ_β", ld1_p1, d_ld1_p1, ld3_p1, d_ld3_p1, perc=True))
 print()
 
 # Counting rate - Voltage dependency Measurement
@@ -107,7 +114,7 @@ d_n = sqrt(n * t) / t
 n_0 = ms.mv(n[:3])
 d_n_0 = ms.dsto_mv(n[:3])
 
-ms.pltext.initplot(num=3, title=titles[0], xlabel=r'$U$ / V', ylabel=r'$n$ / (1/s)')
+ms.pltext.initplot(num=3, title=titles[2], xlabel=r'$U$ / V', ylabel=r'$n$ / (1/s)')
 s, d_s, b, d_b = ms.linreg(U, n, d_n, fit_range=range(3, len(U)), plot=True)
 
 U_G = (n_0 - b) / s
@@ -132,7 +139,7 @@ t2 = 5.0
 beta2, n2 = np.loadtxt('data/255/data6.txt', unpack=True)
 d_n2 = sqrt(n2 * t2) / t2
 
-ms.pltext.initplot(num=4, ncols=2, nrows=2, xlabel=r'$\beta$ / $^\circ$', ylabel=r'$n$ / (1/s)')
+ms.pltext.initplot(num=4, ncols=2, nrows=2, title=titles[3], xlabel=r'$\beta$ / $^\circ$', ylabel=r'$n$ / (1/s)')
 ms.pltext.set_axis(0)
 [mu1_2, sigma1_2, A1_2], [d_mu1_2, d_sigma1_2, d_A1_2] = ms.fit(beta2, n2, d_n2, gauss, p0=[6.5, 0.2, 650], fit_range=range(15, 19), plot=True)
 ms.pltext.set_axis(1)
@@ -142,16 +149,16 @@ ms.pltext.set_axis(2)
 ms.pltext.set_axis(3)
 [mu4_2, sigma4_2, A4_2], [d_mu4_2, d_sigma4_2, d_A4_2] =ms.fit(beta2, n2, d_n2, gauss, p0=[14.5, 0.15, 200], fit_range=range(57, 61), plot=True)
 
-print(ms.val("μ1", mu1_2, d_mu1_2, unit='°', prefix=False))
-print(ms.val("μ2", mu2_2, d_mu2_2, unit='°', prefix=False))
-print(ms.val("μ3", mu3_2, d_mu3_2, unit='°', prefix=False))
-print(ms.val("μ4", mu4_2, d_mu4_2, unit='°', prefix=False))
+print(ms.val("μ1", mu1_2, sigma1_2, unit='°', prefix=False))
+print(ms.val("μ2", mu2_2, sigma2_2, unit='°', prefix=False))
+print(ms.val("μ3", mu3_2, sigma3_2, unit='°', prefix=False))
+print(ms.val("μ4", mu4_2, sigma4_2, unit='°', prefix=False))
 print()
 
 beta1_2 = mu1_2 * cs.degree
-d_beta1_2 = d_mu1_2 * cs.degree
+d_beta1_2 = sigma1_2 * cs.degree
 beta2_2 = mu2_2 * cs.degree
-d_beta2_2 = d_mu2_2 * cs.degree
+d_beta2_2 = sigma2_2 * cs.degree
 
 l_alpha_2 = ld2_p1 / sin(beta2_2)
 d_l_alpha_2 = l_alpha_2 * sqrt((d_ld2_p1 / ld2_p1)**2 + (d_beta2_2 / tan(beta2_2))**2)
@@ -175,4 +182,5 @@ print(ms.sig("N_A", N_A_alpha_2, d_N_A_alpha_2, N_A_beta_2, d_N_A_beta_2))
 print()
 
 # Show plots
-#ms.plt.show()
+ms.pltext.savefigs("figures/255")
+ms.plt.show()
