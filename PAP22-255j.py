@@ -6,7 +6,6 @@ import scipy.constants as cs
 
 ms.plt.rc('text', usetex=True)
 ms.plt.rc('font', family='serif')
-conv = [lambda s: float(s.replace(',', '.'))]
 
 titles = [
   r'Bestimmung des Grenzwinkels $\beta_G$ durch Extrapolation' '\n' r'des linearen Endes des Grenzspektrums (Zählrate $n$ in Abhängigkeit des Winkels $\beta$).',
@@ -29,7 +28,7 @@ d_n1 = sqrt(n1 * t1) / t1
 n1_0 = ms.mv(n1[0:7])
 d_n1_0 = ms.dsto_mv(n1[0:7])
 
-ms.pltext.initplot(num=1, title=titles[0], xlabel=r'$\beta$ / $^\circ$', ylabel=r'$n$ / (1/s)')
+ms.pltext.initplot(num=1, title=titles[0], xlabel=r'$\beta$ / $^\circ$', ylabel=r'$n$ / (1/s)', fignum=True)
 s1, d_s1, b1, d_b1 = ms.linreg(beta1[:20], n1[:20], d_n1[:20], fit_range=range(10, 13), plot=True)
 beta1_G = (n1_0 - b1) / s1
 d_beta1_G = beta1_G * sqrt((d_n1_0**2 + d_b1**2) / (n1_0 - b1)**2 + (d_s1 / s1)**2)
@@ -67,7 +66,7 @@ d_n2_p1 = sqrt(n2_p1 * t_p1) / t_p1
 d_n3_p1 = sqrt(n3_p1 * t_p1) / t_p1
 d_n4_p1 = sqrt(n4_p1 * t_p1) / t_p1
 
-ms.pltext.initplot(num=2, nrows=2, ncols=2, title=titles[1], xlabel=r'$\beta$ / $^\circ$', ylabel=r'$n$ / (1/s)')
+ms.pltext.initplot(num=2, nrows=2, ncols=2, title=titles[1], xlabel=r'$\beta$ / $^\circ$', ylabel=r'$n$ / (1/s)', fignum=True)
 ms.pltext.set_axis(0)
 [mu1_p1, sigma1_p1, A1_p1], [d_mu1_p1, d_sigma1_p1, d_A1_p1] = ms.fit(beta1_p1, n1_p1, d_n1_p1, gauss, p0=[9.0, 0.2, 450], plot=True, fit_range=range(3, 7))
 ms.pltext.set_axis(1)
@@ -114,7 +113,7 @@ d_n = sqrt(n * t) / t
 n_0 = ms.mv(n[:3])
 d_n_0 = ms.dsto_mv(n[:3])
 
-ms.pltext.initplot(num=3, title=titles[2], xlabel=r'$U$ / V', ylabel=r'$n$ / (1/s)')
+ms.pltext.initplot(num=3, title=titles[2], xlabel=r'$U$ / V', ylabel=r'$n$ / (1/s)', fignum=True)
 s, d_s, b, d_b = ms.linreg(U, n, d_n, fit_range=range(3, len(U)), plot=True)
 
 U_G = (n_0 - b) / s
@@ -139,7 +138,7 @@ t2 = 5.0
 beta2, n2 = np.loadtxt('data/255/data6.txt', unpack=True)
 d_n2 = sqrt(n2 * t2) / t2
 
-ms.pltext.initplot(num=4, ncols=2, nrows=2, title=titles[3], xlabel=r'$\beta$ / $^\circ$', ylabel=r'$n$ / (1/s)')
+ms.pltext.initplot(num=4, ncols=2, nrows=2, title=titles[3], xlabel=r'$\beta$ / $^\circ$', ylabel=r'$n$ / (1/s)', fignum=True)
 ms.pltext.set_axis(0)
 [mu1_2, sigma1_2, A1_2], [d_mu1_2, d_sigma1_2, d_A1_2] = ms.fit(beta2, n2, d_n2, gauss, p0=[6.5, 0.2, 650], fit_range=range(15, 19), plot=True)
 ms.pltext.set_axis(1)

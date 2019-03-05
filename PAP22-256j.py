@@ -19,7 +19,7 @@ d_E_alpha = npf([0.15, 0.17, 0.20, 0.16, 0.17, 0.17, 0.17, 0.18]) * cs.kilo * cs
 sr_E_alpha = sqrt(E_alpha)
 d_sr_E_alpha = d_E_alpha / (2 * sr_E_alpha)
 
-ms.pltext.initplot(num=1, title=titles[0], xlabel=r'$Z$', ylabel=r'$\sqrt{E_\alpha} / \sqrt{\mathrm{eV}}$')
+ms.pltext.initplot(num=1, title=titles[0], xlabel=r'$Z$', ylabel=r'$\sqrt{E_\alpha} / \sqrt{\mathrm{eV}}$', fignum=True)
 s1, d_s1, b1, d_b1 = ms.linreg(Z1, sr_E_alpha / sqrt(cs.e), d_sr_E_alpha / sqrt(cs.e), plot=True)
 s1 *= sqrt(cs.e)
 d_s1 *= sqrt(cs.e)
@@ -48,7 +48,7 @@ d_E_beta = npf([0.17, 0.17, 0.15, 0.18, 0.17, 0.18, 0.24]) * cs.kilo * cs.e
 sr_E_beta = sqrt(E_beta)
 d_sr_E_beta = d_E_beta / (2 * sr_E_beta)
 
-ms.pltext.initplot(num=2, title=titles[1], xlabel=r'$Z$', ylabel=r'$\sqrt{E_\beta} / \sqrt{\mathrm{eV}}$')
+ms.pltext.initplot(num=2, title=titles[1], xlabel=r'$Z$', ylabel=r'$\sqrt{E_\beta} / \sqrt{\mathrm{eV}}$', fignum=True)
 s2, d_s2, b2, d_b2 = ms.linreg(Z2, sr_E_beta / sqrt(cs.e), d_sr_E_beta / sqrt(cs.e), plot=True)
 s2 *= sqrt(cs.e)
 d_s2 *= sqrt(cs.e)
