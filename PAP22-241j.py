@@ -61,21 +61,29 @@ print()
 # (4) Frequency of an oscillating circuit
 C4 = 47 * cs.nano
 R4 = fa([1000, 220, 47])
-f4_R = [3.85, 3.70, 3.70]
-d_f4_R = [0.05, 0.05, 0.05]
-f4_1 = [2.15, 3.18, 3.37]
-d_f4_1 = [0.05, 0.05, 0.05]
-f4_2 = [7.08, 4.41, 4.00]
-d_f4_2 = [0.05, 0.05, 0.05]
+f4_R = fa([3.85, 3.70, 3.70])
+d_f4_R = fa([0.05, 0.05, 0.05])
+f4_1 = fa([2.15, 3.18, 3.37])
+d_f4_1 = fa([0.05, 0.05, 0.05])
+f4_2 = fa([7.08, 4.41, 4.00])
+d_f4_2 = fa([0.05, 0.05, 0.05])
+delta_omega4 = f4_2 - f4_1
+d_delta_omega4 = sqrt(d_f4_2**2 + d_f4_1**2)
 
 L4 = 1 / ((2 * pi * f4_R)**2 * C4)
 d_L4 = 2 * L4 * d_f4_R / f4_R
 d_L4 = 1 / len(L4) * sqrt(np.sum(d_L4**2))
 L4 = ms.mv(L4)
 
+R4_G = delta_omega4 * L4
+d_R4_G = R4_G * sqrt((d_delta_omega4 / delta_omega4)**2 + (d_L4 / L4)**2)
 
-print('Frequency of an oscillating circuit')
+print('4. Frequency of an oscillating circuit')
+print(ms.val('L', L4, d_L4, unit='H'))
+print()
+print(ms.tbl([ms.lst(R4_G, d_R4_G, name='R', unit='Ω')]))
+print()
 
 # Save and show plots
-ms.pltext.savefigs('figures/241')
-ms.plt.show()
+#ms.pltext.savefigs('figures/241')
+#ms.plt.show()
