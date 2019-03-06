@@ -58,6 +58,23 @@ print(ms.val('f_G', f2_G, d_f2_G, unit='Hz'))
 print(ms.dev(f2_G, d_f2_G, 3.0e3, 0.3e3, name='f_G'))
 print()
 
+# (4) Frequency of an oscillating circuit
+C4 = 47 * cs.nano
+R4 = fa([1000, 220, 47])
+f4_R = [3.85, 3.70, 3.70]
+d_f4_R = [0.05, 0.05, 0.05]
+f4_1 = [2.15, 3.18, 3.37]
+d_f4_1 = [0.05, 0.05, 0.05]
+f4_2 = [7.08, 4.41, 4.00]
+d_f4_2 = [0.05, 0.05, 0.05]
+
+L4 = 1 / ((2 * pi * f4_R)**2 * C4)
+d_L4 = 2 * L4 * d_f4_R / f4_R
+d_L4 = 1 / len(L4) * sqrt(np.sum(d_L4**2))
+L4 = ms.mv(L4)
+
+
+print('Frequency of an oscillating circuit')
 
 # Save and show plots
 ms.pltext.savefigs('figures/241')
