@@ -89,6 +89,30 @@ print()
 print(ms.tbl([ms.lst(R4_G, d_R4_G, name='R', unit='Ω')]))
 print()
 
+# (5) Determination of the dampting constant of a free, damped oscillating circuit
+A5 = [1.83, 1.17, 0.80, 0.56, 0.38]
+d_A5 = [0.10, 0.10, 0.10, 0.10, 0.10]
+T5 = [0.26, 0.26, 0.26, 0.26]
+d_T5 = [0.03, 0.03, 0.03, 0.03]
+
+Ld5 = ln(A5[:-1] / A5[1:])
+d_Ld5 = np.sum((d_A5[:-1] / A5[:-1])**2 + (d_A5[1:] / A5[1:])**2) / (len(A5) - 1)
+Ld5 = ms.mv(Ld5)
+
+d_T5 = np.sum(d_T5**2) / len(T5)
+T5 = ms.mv(T5)
+
+delta5 = Ld5 / T5
+d_delta5 = delta5 * sqrt((d_Ld5 / Ld5)**2 + (d_T5 / T5)**2)
+
+R5_G = 2 * L4 * delta5
+d_R5_G = R5_G * sqrt((d_L4 / L4)**2 + (d_delta5 / delta5)**2)
+
+print(ms.val("Λ", Ld5, d_Ld5))
+print(ms.val("T", T5, d_T5))
+print(ms.val("δ", delta5, d_delta5, unit='1/s', prefix=False))
+print(ms.val)
+
 # Save and show plots
 #ms.pltext.savefigs('figures/241')
 #ms.plt.show()
