@@ -351,23 +351,8 @@ class pltext:
     plt.sca(plt.gcf().axes[num])
 
   @staticmethod
-  def plotdata(x, y, dy=[], dx=[], label='', color=None, connect=False):
-    # Do not plot uncertainties if they are zero
-    if all(err == 0.0 for err in dx):
-      dx = []
-    if all(err == 0.0 for err in dy):
-      dy = []
-    
-    # Plot data with errorbars, excluding empty uncertainties
-    if (dx == [] and dy == []):
-      plot = plt.errorbar(x=x, y=y, label=label, color=color, fmt='o', markersize=3, capsize=5)
-    elif (dx == [] and dy != []):
-      plot = plt.errorbar(x=x, y=y, yerr=dy, label=label, color=color, fmt='o', markersize=3, capsize=5)
-    elif (dx != [] and dy == []):
-      plot = plt.errorbar(x=x, y=y, xerr=dx, label=label, color=color, fmt='o', markersize=3, capsize=5)
-    else:
-      plot = plt.errorbar(x=x, y=y, yerr=dy, xerr=dx, label=label, color=color, fmt='o', markersize=3, capsize=5)
-    
+  def plotdata(x, y, dy=None, dx=None, label='', color=None, connect=False):
+    plot = plt.errorbar(x=x, y=y, yerr=dy, xerr=dx, label=label, color=color, fmt='o', markersize=3, capsize=5)
     # Other plot options
     for cap in plot[1]:
       cap.set_markeredgewidth(1)
