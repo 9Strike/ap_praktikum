@@ -354,23 +354,8 @@ class pltext:
     plt.sca(plt.gcf().axes[num])
 
   @staticmethod
-  def plotdata(x, y, dy=[], dx=[], label='', color=None, connect=False):
-    # Do not plot uncertainties if they are zero
-    if all(err == 0.0 for err in dx):
-      dx = []
-    if all(err == 0.0 for err in dy):
-      dy = []
-    
-    # Plot data with errorbars, excluding empty uncertainties
-    if (dx == [] and dy == []):
-      plot = plt.errorbar(x=x, y=y, label=label, color=color, fmt='o', markersize=3, capsize=5)
-    elif (dx == [] and dy != []):
-      plot = plt.errorbar(x=x, y=y, yerr=dy, label=label, color=color, fmt='o', markersize=3, capsize=5)
-    elif (dx != [] and dy == []):
-      plot = plt.errorbar(x=x, y=y, xerr=dx, label=label, color=color, fmt='o', markersize=3, capsize=5)
-    else:
-      plot = plt.errorbar(x=x, y=y, yerr=dy, xerr=dx, label=label, color=color, fmt='o', markersize=3, capsize=5)
-    
+  def plotdata(x, y, dy=None, dx=None, label='', color=None, connect=False):
+    plot = plt.errorbar(x=x, y=y, yerr=dy, xerr=dx, label=label, color=color, fmt='o', markersize=3, capsize=5)
     # Other plot options
     for cap in plot[1]:
       cap.set_markeredgewidth(1)
@@ -388,7 +373,7 @@ class pltext:
     for i in plt.get_fignums():
       plt.figure(i).savefig(path + '/fig' + str(i) +'.pdf', papertype='a4', orientation='landscape', bbox_inches='tight', pad_inches=0.3, format='pdf')
 
-def linreg(x, y, dy, dx=[], fit_range=None, plot=False, graphname='', legend=False):
+def linreg(x, y, dy, dx=None, fit_range=None, plot=False, graphname='', legend=False):
   if (fit_range == None):
     fit_range = range(len(x))
   def linreg_iter(x, y, dy):
@@ -410,8 +395,9 @@ def linreg(x, y, dy, dx=[], fit_range=None, plot=False, graphname='', legend=Fal
 
   iter0 = linreg_iter(x, y, dy)
   result = []
-  if (dx == []):
-    dx = [0.0 for i in range(len(x))]
+  dx_ = dx
+  if (dx == None):
+    dx_ = np.zeros(len(x))
     result = iter0
   else:
     g = iter0[0]
@@ -426,7 +412,7 @@ def linreg(x, y, dy, dx=[], fit_range=None, plot=False, graphname='', legend=Fal
     [g, dg, b, db] = result
     min_x = np.argmin(x)
     max_x = np.argmax(x)
-    xint = nplinspace(x[min_x] - dx[min_x], x[max_x] + dx[max_x])
+    xint = nplinspace(x[min_x] - dx_[min_x], x[max_x] + dx_[max_x])
     yfit = g * xint + b
     yerr = (g + dg) * xint + (b - db)
     data_plot = pltext.plotdata(x=x, y=y, dy=dy, dx=dx, label=graphname)
@@ -443,19 +429,20 @@ def linreg(x, y, dy, dx=[], fit_range=None, plot=False, graphname='', legend=Fal
       plt.legend()
   return result
 
-def expreg(x, y, dy, dx=[], fit_range=None, plot=True):
+def expreg(x, y, dy, dx=None, fit_range=None, plot=True):
   if fit_range == None:
     fit_range = range(len(x))
-  if dx == []:
-    dx = np.zeros(len(x))
   expo, dexpo, _yitc, _dyitc = linreg(x, np.log(y), dy/y, dx, fit_range=fit_range)
   yitc = exp(_yitc)
   dyitc = yitc * _dyitc
   result = [expo,dexpo,yitc,dyitc]
   if (plot):
+    dx_ = dx
+    if dx == None:
+      dx_ = np.zeros(len(x))
     min_x = np.argmin(x)
     max_x = np.argmax(x)
-    xint = np.linspace(x[min_x] - dx[min_x], x[max_x] + dx[max_x], 1000)
+    xint = np.linspace(x[min_x] - dx_[min_x], x[max_x] + dx_[max_x], 1000)
     yfit = yitc * exp(expo * xint)
     yerr = (yitc - dyitc) * exp((expo + dexpo) * xint)
     data_plot = pltext.plotdata(x=x, y=y, dy=dy, dx=dx)
