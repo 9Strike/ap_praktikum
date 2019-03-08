@@ -117,6 +117,7 @@ d_R4_V2 = d_R4_G
 print('4. Frequency of an oscillating circuit')
 print(ms.val('L', L4, d_L4, unit='H'))
 print()
+
 print(ms.tbl([ms.lst(R4, name='R', unit='Ω'),
               ms.lst(delta_omega4, d_delta_omega4, name='Δω', unit='Hz'),
               ms.lst(R4_G, d_R4_G, name='R_G', unit='Ω'),
