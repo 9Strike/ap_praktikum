@@ -9,6 +9,10 @@ from measure import sqrt, sin, cos, tan, exp, ln
 ms.plt.rc('text', usetex=True)
 ms.plt.rc('font', family='serif')
 
+titles = [
+  r'Phasenverschiebung $\varphi$ eines Hochpassfilters ($C = 47$ nF, $R = 1$ k$\Omega$) in Abhängigkeit der Frequenz $f$.'
+]
+
 # (1) Determination of the response time of a RC-element
 C1 = fa([470, 4.7, 47]) * cs.nano
 d_C1 = 0.10 * C1
@@ -29,33 +33,54 @@ print()
 print('1. Determination of the response time of a RC-element:')
 print(ms.tbl([ms.lst(C1, d_C1, name='C', unit='F'),
               ms.lst(R1, d_R1, name='R', unit='Ω'),
-              ms.lst(f1, name='f', unit='Hz'),
               ms.lst(tau1_O, d_tau1_O, name='τ', unit='s'),
               ms.lst(tau1_T, d_tau1_T, name='τ', unit='s'), ms.dev(tau1_O, d_tau1_O, tau1_T, d_tau1_T, name='τ')]))
-print()
 
-# (2) Frequency and phase of a RC-element
-f2 = np.arange(1, 11, 1) * cs.kilo
-delta_t2 = fa([0.20, 0.08, 0.042, 0.027, 0.019, 0.013, 0.010, 0.007, 0.007, 0.005]) * cs.milli
-d_delta_t2 = fa([0.03, 0.02, 0.015, 0.015, 0.010, 0.010, 0.005, 0.005, 0.005, 0.004]) * cs.milli
-phi2 = 2 * pi * f2 * delta_t2
-d_phi2 = 2 * pi * f2 * d_delta_t2
+# (3) Frequency and phase of a RC-element
+R3 = cs.kilo
+C3 = 47 * cs.nano
+f3_G_low = 3.0 * cs.kilo
+d_f3_G_low = 0.3 * cs.kilo
+f3_G_high = 3.1 * cs.kilo
+d_f3_G_high = 0.3 * cs.kilo
 
-ms.pltext.initplot(num=1, xlabel=r'$f$ / Hz', ylabel=r'$\varphi$ / $^\circ$')
-s2, d_s2, i2, d_i2 = ms.linreg(f2, phi2 / cs.degree, d_phi2 / cs.degree, fit_range=range(3), plot=True)
-s2 *= cs.degree
-d_s2 *= cs.degree
-i2 *= cs.degree
-d_i2 *= cs.degree
+f3 = np.arange(1, 11, 1) * cs.kilo
+delta_t3 = fa([0.20, 0.08, 0.042, 0.027, 0.019, 0.013, 0.010, 0.007, 0.007, 0.005]) * cs.milli
+d_delta_t3 = fa([0.03, 0.02, 0.015, 0.015, 0.010, 0.010, 0.005, 0.005, 0.005, 0.004]) * cs.milli
+phi3 = 2 * pi * f3 * delta_t3
+d_phi3 = 2 * pi * f3 * d_delta_t3
 
-f2_G = (pi - 4 * i2) / (4 * s2)
-d_f2_G = f2_G * sqrt((d_i2 / (pi - 4 * i2))**2 + (d_s2 / s2)**2)
+ms.pltext.initplot(num=5, title=titles[0], xlabel=r'$f$ / kHz', ylabel=r'$\varphi$ / $^\circ$', fignum=True)
+s3, d_s3, i3, d_i3 = ms.linreg(f3 / cs.kilo, phi3 / cs.degree, d_phi3 / cs.degree, fit_range=range(3), plot=True)
+s3 *= cs.degree / cs.kilo
+d_s3 *= cs.degree / cs.kilo
+i3 *= cs.degree
+d_i3 *= cs.degree
 
-print('2. Frequency and phase of a RC-element:')
-print(ms.val('s', s2, d_s2))
-print(ms.val('i', i2, d_i2))
-print(ms.val('f_G', f2_G, d_f2_G, unit='Hz'))
-print(ms.dev(f2_G, d_f2_G, 3.0e3, 0.3e3, name='f_G'))
+f3_G_low_p1 = 2.9 * cs.kilo
+d_f3_G_low_p1 = 0.3 * cs.kilo
+f3_G_high_p1 = 3.1 * cs.kilo
+d_f3_G_high_p1 = 0.3 * cs.kilo
+
+f3_G_high_p2 = (pi - 4 * i3) / (4 * s3)
+d_f3_G_high_p2 = f3_G_high_p2 * sqrt((d_i3 / (pi - 4 * i3))**2 + (d_s3 / s3)**2)
+
+f3_G_T = 1 / (2 * pi * R3 * C3)
+
+print('3. Frequency and phase of a RC-element:')
+print(ms.val('s', s3, d_s3))
+print(ms.val('i', i3, d_i3))
+print(ms.val('low: f_G', f3_G_low, d_f3_G_low, unit='Hz'))
+print(ms.val('high: f_G', f3_G_high, d_f3_G_high, unit='Hz'))
+print(ms.val('low: f_G', f3_G_low_p1, d_f3_G_low_p1, unit='Hz'))
+print(ms.val('high: f_G', f3_G_high_p1, d_f3_G_high_p1, unit='Hz'))
+print(ms.val('high: f_G', f3_G_high_p2, d_f3_G_high_p2, unit='Hz'))
+print(ms.val('f_G', f3_G_T, unit='Hz'))
+print(ms.dev(f3_G_low, d_f3_G_low, f3_G_T, name='low: f_G'))
+print(ms.dev(f3_G_high, d_f3_G_high, f3_G_T, name='high: f_G'))
+print(ms.dev(f3_G_low_p1, d_f3_G_low_p1, f3_G_T, name='low: f_G'))
+print(ms.dev(f3_G_high_p1, d_f3_G_high_p1, f3_G_T, name='high: f_G'))
+print(ms.dev(f3_G_high_p2, d_f3_G_high_p2, f3_G_T, name='high: f_G'))
 print()
 
 # (4) Frequency of an oscillating circuit
@@ -66,14 +91,14 @@ U4_E = 1.00
 d_U4_E = 0.01
 U4_A = fa([0.94, 0.73, 0.31])
 d_U4_A = fa([0.01, 0.01, 0.01])
-f4_R = fa([3.85, 3.70, 3.70])
-d_f4_R = fa([0.05, 0.05, 0.05])
-f4_1 = fa([2.15, 3.18, 3.37])
-d_f4_1 = fa([0.05, 0.05, 0.05])
-f4_2 = fa([7.08, 4.41, 4.00])
-d_f4_2 = fa([0.05, 0.05, 0.05])
-delta_omega4 = f4_2 - f4_1
-d_delta_omega4 = sqrt(d_f4_2**2 + d_f4_1**2)
+f4_R = fa([3.85, 3.70, 3.70]) * cs.kilo
+d_f4_R = fa([0.05, 0.05, 0.05]) * cs.kilo
+f4_1 = fa([2.15, 3.18, 3.37]) * cs.kilo
+d_f4_1 = fa([0.05, 0.05, 0.05]) * cs.kilo
+f4_2 = fa([7.08, 4.41, 4.00]) * cs.kilo
+d_f4_2 = fa([0.05, 0.05, 0.05]) * cs.kilo
+delta_omega4 = 2 * pi * (f4_2 - f4_1)
+d_delta_omega4 = 2 * pi * sqrt(d_f4_2**2 + d_f4_1**2)
 
 L4 = 1 / ((2 * pi * f4_R)**2 * C4)
 d_L4 = 2 * L4 * d_f4_R / f4_R
@@ -83,17 +108,29 @@ L4 = ms.mv(L4)
 R4_G = delta_omega4 * L4
 d_R4_G = R4_G * sqrt((d_delta_omega4 / delta_omega4)**2 + (d_L4 / L4)**2)
 
+R4_V1 = (U4_E / U4_A - 1) * R4
+d_R4_V1 = U4_E / U4_A * sqrt((d_U4_E / U4_E)**2 + (d_U4_A / U4_A)**2) * R4
+
+R4_V2 = R4_G - R4
+d_R4_V2 = d_R4_G
+
 print('4. Frequency of an oscillating circuit')
 print(ms.val('L', L4, d_L4, unit='H'))
 print()
-print(ms.tbl([ms.lst(R4_G, d_R4_G, name='R', unit='Ω')]))
-print()
+print(ms.tbl([ms.lst(R4, name='R', unit='Ω'),
+              ms.lst(delta_omega4, d_delta_omega4, name='Δω', unit='Hz'),
+              ms.lst(R4_G, d_R4_G, name='R_G', unit='Ω'),
+              ms.lst(R4_V1, d_R4_V1, name='R_V', unit='Ω'),
+              ms.lst(R4_V2, d_R4_V2, name='R_V', unit='Ω'),
+              ms.dev(R4_V1, d_R4_V1, R4_V2, d_R4_V2, name='R_V')]))
 
 # (5) Determination of the dampting constant of a free, damped oscillating circuit
-A5 = [1.83, 1.17, 0.80, 0.56, 0.38]
-d_A5 = [0.10, 0.10, 0.10, 0.10, 0.10]
-T5 = [0.26, 0.26, 0.26, 0.26]
-d_T5 = [0.03, 0.03, 0.03, 0.03]
+L5 = L4
+d_L5 = d_L4
+A5 = fa([1.83, 1.17, 0.80, 0.56, 0.38])
+d_A5 = fa([0.10, 0.10, 0.10, 0.10, 0.10])
+T5 = fa([0.26, 0.26, 0.26, 0.26]) * cs.milli
+d_T5 = fa([0.03, 0.03, 0.03, 0.03]) * cs.milli
 
 Ld5 = ln(A5[:-1] / A5[1:])
 d_Ld5 = np.sum((d_A5[:-1] / A5[:-1])**2 + (d_A5[1:] / A5[1:])**2) / (len(A5) - 1)
@@ -105,14 +142,68 @@ T5 = ms.mv(T5)
 delta5 = Ld5 / T5
 d_delta5 = delta5 * sqrt((d_Ld5 / Ld5)**2 + (d_T5 / T5)**2)
 
-R5_G = 2 * L4 * delta5
-d_R5_G = R5_G * sqrt((d_L4 / L4)**2 + (d_delta5 / delta5)**2)
+R5_G = 2 * L5 * delta5
+d_R5_G = R5_G * sqrt((d_L5 / L5)**2 + (d_delta5 / delta5)**2)
 
-print(ms.val("Λ", Ld5, d_Ld5))
-print(ms.val("T", T5, d_T5))
-print(ms.val("δ", delta5, d_delta5, unit='1/s', prefix=False))
-print(ms.val)
+print('5. Determination of the dampting constant of a free, damped oscillating circuit')
+print(ms.val('Λ', Ld5, d_Ld5))
+print(ms.val('T', T5, d_T5))
+print(ms.val('δ', delta5, d_delta5, unit='1/s', prefix=False))
+print(ms.val('R_G', R5_G, d_R5_G, unit='Ω'))
+print(ms.dev(R4_G[2], d_R4_G[2], R5_G, d_R5_G, name='R_G'))
+print()
+
+# (6) Resonance magnification
+C6 = 47 * cs.nano
+R6 = 220
+L6 = L4
+d_L6 = d_L4
+omega6_R = 2 * pi * 3.84 * cs.kilo
+d_omega6_R = 2 * pi * 0.05 * cs.kilo
+omega6_C = 2 * pi * 3.75 * cs.kilo
+d_omega6_C = 2 * pi * 0.05 * cs.kilo
+omega6_L = 2 * pi * 3.93 * cs.kilo
+d_omega6_L = 2 * pi * 0.05 * cs.kilo
+
+delta6 = R6 / (2 * L6)
+d_delta6 = R6 * d_L6 / (2 * L6**2)
+omega6_R_T = 1 / sqrt(L6 * C6)
+d_omega6_R_T = omega6_R_T * d_L6 / (2 * L6)
+omega6_C_T = sqrt(omega6_R_T**2 - 2 * delta6**2)
+d_omega6_C_T = sqrt((2 * omega6_R_T * d_omega6_R_T)**2 + (4 * delta6 * d_delta6)**2) / (2 * omega6_C_T)
+omega6_L_T = sqrt(omega6_R_T**2 + 2 * delta6**2)
+d_omega6_L_T = sqrt((2 * omega6_R_T * d_omega6_R_T)**2 + (4 * delta6 * d_delta6)**2) / (2 * omega6_L_T)
+
+
+print('6. Resonance magnification')
+print(ms.val('ω_R', omega6_R, d_omega6_R, unit='Hz'))
+print(ms.val('ω_R', omega6_R_T, d_omega6_R_T, unit='Hz'))
+print(ms.dev(omega6_R, d_omega6_R, omega6_R_T, d_omega6_R_T, name='ω_R'))
+print(ms.val('ω_C', omega6_C, d_omega6_C, unit='Hz'))
+print(ms.val('ω_C', omega6_C_T, d_omega6_C_T, unit='Hz'))
+print(ms.dev(omega6_C, d_omega6_C, omega6_C_T, d_omega6_C_T, name='ω_C'))
+print(ms.val('ω_L', omega6_L, d_omega6_L, unit='Hz'))
+print(ms.val('ω_L', omega6_L_T, d_omega6_L_T, unit='Hz'))
+print(ms.dev(omega6_L, d_omega6_L, omega6_L_T, d_omega6_L_T, name='ω_L'))
+print()
+
+# (7) Band-stop filter
+R7 = cs.kilo
+C7 = 47 * cs.nano
+L7 = L4
+d_L7 = d_L4
+omega7 = 2 * pi * 3.89 * cs.kilo
+d_omega7 = 2 * pi * 0.15 * cs.kilo
+
+omega7_T = 1 / sqrt(L7 * C7)
+d_omega7_T = omega7_T * d_L7 / (2 * L7)
+
+print('7. band-stop filter')
+print(ms.val('ω', omega7, d_omega7, unit='Hz'))
+print(ms.val('ω', omega7_T, d_omega7_T, unit='Hz'))
+print(ms.dev(omega7, d_omega7, omega7_T, d_omega7_T, name='ω'))
+print()
 
 # Save and show plots
-#ms.pltext.savefigs('figures/241')
+ms.pltext.savefigs('figures/241')
 #ms.plt.show()
