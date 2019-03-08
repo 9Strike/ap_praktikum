@@ -156,7 +156,7 @@ def lst(val, err=[], name='', unit='', prefix=True, expToFix=None):
   if expToFix == None or prefix:
     exps = np.zeros(N)
     for i in range(N):
-      _, _, exps[i] = sigval(val[i], err[i])
+      _, _, exps[i] = sigval(val[i], err[i], True)
     exps, counts = np.unique(exps, return_counts=True)
     lstExp = int(exps[np.argmax(counts)])
 
@@ -179,9 +179,12 @@ def lst(val, err=[], name='', unit='', prefix=True, expToFix=None):
     title += ' / '
     if prefix and unit != '':
       p = lstExp // 3
-      if p > 0:
-        p -= 1
-      title += unitPrefixes[p] + unit
+      if p == 0:
+        title += unit
+      else:
+        if p > 0:
+          p -= 1
+        title += unitPrefixes[p] + unit
     else:
       if unit != '':
         title += '(' + 'e' + str(lstExp) + ' ' + unit + ')'
