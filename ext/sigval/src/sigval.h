@@ -41,4 +41,4 @@ PyMODINIT_FUNC PyInit_sigval() {
   return PyModule_Create(&sv);
 }
 
-#endif 
+#endif
