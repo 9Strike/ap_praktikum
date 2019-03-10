@@ -151,14 +151,9 @@ void _sigval_fix(double val, double err, double fixExp, char* valstr, char* errs
 
     // Shift
     int fixShift = 0;
-    if (valExp > -3 && valExp < 3) {
-      fixShift = valExp;
-      shiftPoint(valstr, -fixShift);
-      valExp = 0;
-    }
-    else {
-      shiftPoint(valstr, 0);
-    }
+    fixShift = valExp - fixExp;
+    shiftPoint(valstr, -fixShift);
+    valExp -= fixShift;
 
     // Cut the exponent
     valstr[2 + d] = '\0';
@@ -264,14 +259,9 @@ void _sigval_fix_mul3(double val, double err, char* valstr, char* errstr, char* 
 
     // Shift
     int fixShift = 0;
-    if (valExp > -3 && valExp < 3) {
-      fixShift = valExp;
-      shiftPoint(valstr, -fixShift);
-      valExp = 0;
-    }
-    else {
-      shiftPoint(valstr, 0);
-    }
+    fixShift = (valExp % 3 + (valExp < 0 ? 3 : 0)) % 3;
+    shiftPoint(valstr, -fixShift);
+    valExp -= fixShift;
 
     // Cut the exponent
     valstr[2 + d] = '\0';
