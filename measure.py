@@ -40,7 +40,7 @@ unitPrefixes = "kMGTPEZYyzafpnμm"
 # Table chars
 singleFrameChars = ['│', '─', '┼', '┌', '┐', '└', '┘', '├', '┬', '┤' ,'┴']
 doubleFrameChars = ['║', '═', '╬', '╔', '╗', '╚', '╝', '╠', '╦', '╣', '╩']
-tableChars = doubleFrameChars
+tableChars = singleFrameChars
 
 def npfarray(x):
   return np.array(x, dtype='float')
@@ -216,7 +216,7 @@ def lst(val, err=[], name='', unit='', prefix=True, expToFix=None):
   
   return out
 
-def tbl(lists, name=''):
+def tbl(lists, name='', endl=True):
   """
   Parameters
 
@@ -237,7 +237,7 @@ def tbl(lists, name=''):
   # Print column titles
   for i in range(len(titles) - 1):
     out += titles[i].ljust(colWidths[i]) + ' ' + tableChars[0] + ' '
-  out += titles[-1].ljust(colWidths[i]) + '\n'
+  out += titles[-1].ljust(colWidths[-1]) + '\n'
 
   # Print crossbar
   for i in range(len(titles) - 1):
@@ -270,7 +270,7 @@ def tbl(lists, name=''):
   # Print subtitle
   if (name != ''):
     out += name
-  return out
+  return out + ('\n' if endl else '')
 
 def sig(name, val1, err1, val2, err2=0.0, perc=False):
   ### deprecated, use dev instead
