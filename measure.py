@@ -100,7 +100,7 @@ def signval(val, err=0.0):
   valstr = '{:.{digits}e}'.format(val, digits=sdigits)
   return [valstr, errstr]
 
-def val(name, val, err=0.0, unit='', prefix=True):
+def val(name, val, err=0.0, syserr=0.0, unit='', prefix=True):
   """
   Parameters
 
@@ -113,17 +113,33 @@ def val(name, val, err=0.0, unit='', prefix=True):
   string, format: "name = val ± err" with two significant digits
   """
 
+  if syserr != 0.0 and err == 0.0:
+    raise ValueError('If syserr is specified one must also specify err')
+
   out = ''
   if name != '':
     out += name + ' = '
   
-  valstr, errstr, expstr = sigval(val, err, unit != '' and prefix)
+  syserrstr = None
+  if syserr != 0.0:
+    if syserr > err:
+      valstr, syserrstr, expstr = sigval(val, syserr, unit != '' and prefix)
+      exp = int(expstr)
+      _, errstr, _ = sigval(val, err, True, exp)
+    else:
+      valstr, errstr, expstr = sigval(val, err, unit != '' and prefix)
+      exp = int(expstr)
+      _, syserrstr, _ = sigval(val, syserr, True, exp)
+  else:
+    valstr, errstr, expstr = sigval(val, err, unit != '' and prefix)
 
   if err != 0.0 and (expstr[0] != '0' or unit != ''):
     out += '('
   out += valstr
   if err != 0.0:
     out += ' ± ' + errstr
+  if syserr != 0.0:
+    out += ' stat. ± ' + syserrstr + ' syst.'
   if err != 0.0 and (expstr[0] != '0' or unit != ''):
     out += ')'
   if expstr[0] != '0':
