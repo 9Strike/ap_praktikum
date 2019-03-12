@@ -1,6 +1,8 @@
-### measure libraby version 1.8.12
+### measure libraby version 1.9
 import numpy as np
 import matplotlib.pyplot as plt
+
+from matplotlib.collections import LineCollection
 from scipy.optimize import curve_fit
 from sigval import sigval
 
@@ -10,6 +12,7 @@ minfloat = 1e-80 # replaces zeros in linreg
 linspace_res = 2000 # resolution for nplinspace
 
 # Variables for export
+abs = np.abs
 sqrt = np.sqrt
 exp = np.exp
 ln = np.log
@@ -32,7 +35,13 @@ p0 = 101325 # NIST standard pressure
 g = 9.80984 # Gravitanional acceleration in Heidelberg 
 dg = 2e-5 # Uncertainty of the gravitational acceleration
 
+# Unit prefixes for val and lst
 unitPrefixes = "kMGTPEZYyzafpnμm"
+
+# Table chars
+singleFrameChars = ['│', '─', '┼', '┌', '┐', '└', '┘', '├', '┬', '┤' ,'┴']
+doubleFrameChars = ['║', '═', '╬', '╔', '╗', '╚', '╝', '╠', '╦', '╣', '╩']
+tableChars = singleFrameChars
 
 def npfarray(x):
   return np.array(x, dtype='float')
@@ -92,7 +101,7 @@ def signval(val, err=0.0):
   valstr = '{:.{digits}e}'.format(val, digits=sdigits)
   return [valstr, errstr]
 
-def val(name, val, err=0.0, unit='', prefix=True):
+def val(name, val, err=0.0, syserr=0.0, unit='', prefix=True):
   """
   Parameters
 
@@ -105,17 +114,33 @@ def val(name, val, err=0.0, unit='', prefix=True):
   string, format: "name = val ± err" with two significant digits
   """
 
+  if syserr != 0.0 and err == 0.0:
+    raise ValueError('If syserr is specified one must also specify err')
+
   out = ''
   if name != '':
     out += name + ' = '
   
-  valstr, errstr, expstr = sigval(val, err, unit != '' and prefix)
+  syserrstr = None
+  if syserr != 0.0:
+    if syserr > err:
+      valstr, syserrstr, expstr = sigval(val, syserr, unit != '' and prefix)
+      exp = int(expstr)
+      _, errstr, _ = sigval(val, err, True, exp)
+    else:
+      valstr, errstr, expstr = sigval(val, err, unit != '' and prefix)
+      exp = int(expstr)
+      _, syserrstr, _ = sigval(val, syserr, True, exp)
+  else:
+    valstr, errstr, expstr = sigval(val, err, unit != '' and prefix)
 
   if err != 0.0 and (expstr[0] != '0' or unit != ''):
     out += '('
   out += valstr
   if err != 0.0:
     out += ' ± ' + errstr
+  if syserr != 0.0:
+    out += ' stat. ± ' + syserrstr + ' syst.'
   if err != 0.0 and (expstr[0] != '0' or unit != ''):
     out += ')'
   if expstr[0] != '0':
@@ -169,8 +194,9 @@ def lst(val, err=[], name='', unit='', prefix=True, expToFix=None):
       valmaxlen = len(tmp[0])
     if (len(tmp[1]) > errmaxlen):
       errmaxlen = len(tmp[1])
+  colWidth = valmaxlen + errmaxlen + 3 if errmaxlen > 0 else valmaxlen
   
-  # Create and center title
+  # Create title, center title and write to out
   out = []
   title = ''
   if (name != ''):
@@ -190,22 +216,24 @@ def lst(val, err=[], name='', unit='', prefix=True, expToFix=None):
         title += '(' + 'e' + str(lstExp) + ' ' + unit + ')'
       else:
         title += 'e' + str(lstExp) + ' ' + unit
-  pos = int(np.floor((valmaxlen + errmaxlen + 3 + len(title))/2))
-  out.append(title.rjust(pos))
+  colWidth = max(colWidth, len(title))
+  adjust = (colWidth + len(title)) // 2
+  out.append(title.rjust(adjust))
 
   # Write and adjust value error strings to out
   for i in range(len(val)):
     tmp = sigval(val[i], err[i], True, lstExp)
-    tmp2 = tmp[0].ljust(valmaxlen)
+    entry = tmp[0].rjust(valmaxlen)
     if (tmp[1] != ''):
-      tmp2 += ' ± ' + tmp[1].ljust(errmaxlen)
+      entry += ' ± ' + tmp[1].ljust(errmaxlen)
     elif (errmaxlen != 0):
-      tmp2 += ''.ljust(errmaxlen + 3)
-    out.append(tmp2)
+      entry += ''.ljust(errmaxlen + 3)
+    adjust = (colWidth + len(entry)) // 2
+    out.append(entry.rjust(adjust))
   
   return out
 
-def tbl(lists, name=''):
+def tbl(lists, name='', endl=True):
   """
   Parameters
 
@@ -216,32 +244,64 @@ def tbl(lists, name=''):
 
   string of the MxN array
   """
-  M = len(lists[0])
-  N = len(lists)
   out = ''
+  colWidths = [max([len(lists[i][j]) for j in range(len(lists[i]))]) for i in range(len(lists))]
+  titles = [lists[i][0] for i in range(len(lists))]
+  cols = [lists[i][1:] for i in range(len(lists))]
+  nRows = len(cols[0])
+  nCols = len(cols)
+
+  # Print column titles
+  for i in range(len(titles) - 1):
+    out += titles[i].ljust(colWidths[i]) + ' ' + tableChars[0] + ' '
+  out += titles[-1].ljust(colWidths[-1]) + '\n'
+
+  # Print crossbar
+  for i in range(len(titles) - 1):
+    out += tableChars[1] * colWidths[i] + tableChars[1] + tableChars[2] + tableChars[1]
+  out += tableChars[1] * colWidths[-1] + tableChars[1] + '\n'
+
+  # Print tabular rows, by column entries
+  for j in range(nRows - 1):
+    for i in range(nCols - 1):
+      out += cols[i][j].ljust(colWidths[i]) + ' ' + tableChars[0] + ' '
+    out += cols[-1][j].ljust(colWidths[-1]) + '\n'
+  for i in range(nCols - 1):
+    out += cols[i][-1].ljust(colWidths[i]) + ' ' + tableChars[0] + ' '
+  out += cols[-1][-1].ljust(colWidths[-1])
+
+  # Connect extra column, which might be generated by dev
+  rows = out.split('\n')
+  for i in range(1, len(rows)):
+    inds = [s for s in range(len(rows[i])) if rows[i][s] == tableChars[0]]
+    for s in inds:
+      upperRow = list(rows[i - 1])
+      if upperRow[s] == tableChars[1]:
+        upperRow[s] = tableChars[8]
+        rows[i - 1] = ''.join(upperRow)
+  out = ''
+  for i in range(len(rows) - 1):
+    out += rows[i] + '\n'
+  out += rows[-1]
+
+  # Print subtitle
   if (name != ''):
-    out += name + ':\n'
-  lens = [int(npfarray([len(lists[i][j]) for j in range(M)]).max()) for i in range(N)]
-  for j in range(M):
-    for i in range(N):
-      suffix = ' | '
-      if (i == N-1):
-        suffix = '\n' 
-      out += lists[i][j].ljust(lens[i]) + suffix
-  return out
+    out += name
+  return out + ('\n' if endl else '')
 
 def sig(name, val1, err1, val2, err2=0.0, perc=False):
   ### deprecated, use dev instead
   return dev(val1,err1,val2,err2,name=name,perc=perc)
 
 def dev(val1, err1, val2, err2=0.0, name='', perc=False):
-  def get_sig(nominator, denominator):
-    if (nominator == 0.0):
+  # Returns deviation string
+  def get_dev(nom, denom):
+    if (nom == 0.0):
       sigstr = '0'
-    elif (denominator == 0.0):
+    elif (denom == 0.0):
       sigstr = '∞ '
     else:
-      sigma = nominator / denominator
+      sigma = nom / denom
       if (sigma < 0.95):
         digits = int(abs(np.floor(np.log10(sigma))))
       elif (sigma < 3.95):
@@ -252,53 +312,89 @@ def dev(val1, err1, val2, err2=0.0, name='', perc=False):
     sigstr += 'σ'
     return sigstr
 
+  # Returns percental deviation string
   def get_perc(val1,val2,pformat='{:.2f}'):
     percval = abs(val1 - val2) / val2 * 100
     percstr = pformat.format(percval) + '%'
     return percstr
 
+  # Gets deviation of the difference from zero
   out = None
-  nominator = abs(val1 - val2)
-  denominator = np.sqrt(err1**2 + err2**2)
-  if type(val1) is np.ndarray:
+  nom = abs(val1 - val2)
+  denom = np.sqrt(err1**2 + err2**2)
+  if type(nom) is np.ndarray or type(denom) is np.ndarray:
+    # Reconcile argument types
     out = []
     N = len(val1)
-    if type(denominator) is not np.ndarray:
-      denominator = npfarray([denominator for i in range(N)])
+    if type(val1) is not np.ndarray:
+      val1 = npfarray([val1] * N)
+    if type(val2) is not np.ndarray:
+      val2 = npfarray([val2] * N)
+    if type(err1) is not np.ndarray:
+      err1 = npfarray([err1] * N)
+    if type(err2) is not np.ndarray:
+      err2 = npfarray([err2] * N)
+    if type(nom) is not np.ndarray:
+      nom = npfarray([nom] * N)
+    if type(denom) is not np.ndarray:
+      denom = npfarray([denom] * N)
+    
     if perc:
-      if type(val2) is not np.ndarray:
-        val2 = npfarray([val2 for i in range(N)])
-      tmp = []
-      tmp2 = []
-      sigmaxlen = 0
+      # Get deviation and percental deviation strings and determine max lengths
+      devs = []
+      percs = []
+      devmaxlen = 0
       percmaxlen = 0
       for i in range(N):
-        tmp.append(get_sig(nominator[i],denominator[i]))
-        siglen = len(tmp[i])
-        if (siglen > sigmaxlen):
-          sigmaxlen = siglen
-        tmp2.append(get_perc(val1[i],val2[i]))
-        perclen = len(tmp2[i])
+        # Get deviation string
+        devs.append(get_dev(nom[i], denom[i]))
+        siglen = len(devs[i])
+        if (siglen > devmaxlen):
+          devmaxlen = siglen
+        # Get percental deviation string
+        percs.append(get_perc(val1[i], val2[i]))
+        perclen = len(percs[i])
         if (perclen > percmaxlen):
           percmaxlen = perclen
+      colWidth = devmaxlen + 3 + percmaxlen if percmaxlen > 0 else devmaxlen
+
       if (name != ''):
-        adjust = int(np.floor((sigmaxlen/2 + 2 + len(name))))
+        # Center name and write to out
+        colWidth = max(colWidth, len(name))
+        adjust = (colWidth + len(name)) // 2
         out.append(name.rjust(adjust))
       for i in range(N):
-        out.append(tmp[i].rjust(sigmaxlen) + ' | ' + tmp2[i].rjust(percmaxlen))
+        # Center entry and write to out
+        entry = devs[i].rjust(devmaxlen) + ' ' + tableChars[0] + ' ' + percs[i].rjust(percmaxlen)
+        adjust = (colWidth + len(entry)) // 2
+        out.append(entry.rjust(adjust))
     else:
-      if (name != ''):
-        out.append(name)
+      devs = []
+      devmaxlen = 0
       for i in range(N):
-        out.append(get_sig(nominator[i],denominator[i]))
+        # Get deviation string
+        devs.append(get_dev(nom[i], denom[i]))
+        siglen = len(devs[i])
+        if (siglen > devmaxlen):
+          devmaxlen = siglen
+      colWidth = devmaxlen
+
+      if (name != ''):
+        # Center name and write to out
+        colWidth = max(colWidth, len(name))
+        adjust = (colWidth + len(name)) // 2
+        out.append(name.rjust(adjust))
+      for i in range(N):
+        # Center entry and write to out
+        out.append(get_dev(nom[i], denom[i]).rjust(colWidth))
   else:
     out = ''
     prefix = ''
     if (name != ''):
       prefix = name + ': '
-    out += prefix + get_sig(nominator,denominator)
+    out += prefix + get_dev(nom, denom)
     if perc:
-      out += ' ; ' + get_perc(val1,val2,pformat='{:.2g}')
+      out += ' ≙ ' + get_perc(val1, val2, pformat='{:.2g}')
   return out
 
 def chi2(yo, dyo, ye, dye=[]):
@@ -371,11 +467,14 @@ class pltext:
   def savefigs(path):
     # Save figures in 'path' as figN.pdf, where N is the figures number
     for i in plt.get_fignums():
-      plt.figure(i).savefig(path + '/fig' + str(i) +'.pdf', papertype='a4', orientation='landscape', bbox_inches='tight', pad_inches=0.3, format='pdf')
+      plt.figure(i).savefig(path + '/fig' + str(i) +'.pdf', papertype='a4', orientation='landscape', bbox_inches='tight', pad_inches=0.6, format='pdf')
 
-def linreg(x, y, dy, dx=None, fit_range=None, plot=False, graphname='', legend=False):
+def linreg(x, y, dy, dx=None, fit_range=None, plot=False, graphname='', legend=False, scaleReg=False):
+  # Set fit range if None
   if (fit_range == None):
     fit_range = range(len(x))
+  
+  # Regression iteration, for dx is None only one iteration is needed
   def linreg_iter(x, y, dy):
     [s0, s1, s2, s3, s4] = [0.0, 0.0, 0.0, 0.0, 0.0]
     for i in fit_range:
@@ -393,10 +492,11 @@ def linreg(x, y, dy, dx=None, fit_range=None, plot=False, graphname='', legend=F
     db = np.sqrt(s3 / eta)
     return [g, dg, b, db]
 
+  # Compute slope and axis intercept
   iter0 = linreg_iter(x, y, dy)
   result = []
   dx_ = dx
-  if (dx == None):
+  if (dx is None):
     dx_ = np.zeros(len(x))
     result = iter0
   else:
@@ -408,21 +508,33 @@ def linreg(x, y, dy, dx=None, fit_range=None, plot=False, graphname='', legend=F
       dy_ = np.sqrt((g * dx)**2 + dy_**2)
       g = linreg_iter(x, y, dy_)[0]
     result = linreg_iter(x, y, dy_)
+  
+  # Plot
   if (plot):
+    # Get data for regression line plot
     [g, dg, b, db] = result
     min_x = np.argmin(x)
     max_x = np.argmax(x)
     xint = nplinspace(x[min_x] - dx_[min_x], x[max_x] + dx_[max_x])
     yfit = g * xint + b
     yerr = (g + dg) * xint + (b - db)
+
+    # Plot data points
     data_plot = pltext.plotdata(x=x, y=y, dy=dy, dx=dx, label=graphname)
+
+    # Plot regression line and uncertainty line
     color = data_plot[0].get_color()
-    left, right = plt.xlim()
-    top, bottom = plt.ylim()
-    plt.plot(xint, yfit, marker='', color=color)
-    plt.plot(xint, yerr, marker='', linestyle='dashed', color=color)
-    plt.xlim(left, right)
-    plt.ylim(top, bottom)
+    ax = plt.gca()
+    if scaleReg:
+      plt.plot(xint, yfit, marker='', color=color)
+      plt.plot(xint, yerr, marker='', linestyle='dashed', color=color)
+    else:
+      reg_line = LineCollection([np.column_stack((xint, yfit))], colors=color)
+      reg_err_line = LineCollection([np.column_stack((xint, yerr))], colors=color, linestyles='dashed')
+      ax.add_collection(reg_line, autolim=False)
+      ax.add_collection(reg_err_line, autolim=False)
+
+    # Add legend
     if (legend):
       plt.legend(['Fit', 'Fit uncertainty'])
     elif (graphname != ''):
@@ -463,7 +575,7 @@ def fit(x, y, dy, f, p0=None, fit_range=None, plot=True):
   dy_fit = [dy[i] for i in fit_range]
   p, d_p = curve_fit(f, x_fit, y_fit, sigma=dy_fit, p0=p0)
   if plot:
-    xint = np.linspace(np.min(x), np.max(x), 1000)
+    xint = nplinspace(np.min(x), np.max(x))
     yfit = f(xint, *p)
     data_plot = pltext.plotdata(x, y, dy)
     color = data_plot[0].get_color()

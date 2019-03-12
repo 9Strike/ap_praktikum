@@ -34,8 +34,8 @@ void _sigval(double val, double err, char* valstr, char* errstr, char* expstr) {
     int valExp = atoi(valstr + 18);
 
     // Round and get cutted string
-    val = dround(val, -valExp + d);
-    dtostr(val, d, valstr);
+    double val_ = dround(val, -valExp + d);
+    dtostr(val_, d, valstr);
 
     // Shift
     int fixShift = 0;
@@ -71,21 +71,21 @@ void _sigval(double val, double err, char* valstr, char* errstr, char* expstr) {
   // Round to second nonzero place of err
   int d_exp = valExp - errExp;
   int shift = -valExp + d_exp + 1;
-  val = dround(val, shift);
-  err = dround(err, shift);
+  double val_ = dround(val, shift);
+  double err_ = dround(err, shift);
 
   // Get cutted strings
   int d = MAX(0, d_exp + 1);
-  dtostr(val, d, valstr);
-  dtostr(err, 1, errstr);
+  dtostr(val_, d, valstr);
+  dtostr(err_, 1, errstr);
 
   // Round to first nonzero place of err
   if (getDigit(errstr[0]) > 2) {
     --shift; --d;
-    val = dround(val, shift);
-    err = dround(err, shift);
-    dtostr(val, d, valstr);
-    dtostr(err, 0, errstr);
+    val_ = dround(val, shift);
+    err_ = dround(err, shift);
+    dtostr(val_, d, valstr);
+    dtostr(err_, 0, errstr);
   }
 
   // Shift errstr, so the exponend matches val
@@ -146,8 +146,8 @@ void _sigval_fix(double val, double err, double fixExp, char* valstr, char* errs
     int valExp = atoi(valstr + 18);
 
     // Round and get cutted string
-    val = dround(val, -valExp + d);
-    dtostr(val, d, valstr);
+    double val_ = dround(val, -valExp + d);
+    dtostr(val_, d, valstr);
 
     // Shift
     int fixShift = 0;
@@ -178,21 +178,21 @@ void _sigval_fix(double val, double err, double fixExp, char* valstr, char* errs
   // Round to second nonzero place of err
   int d_exp = valExp - errExp;
   int shift = -valExp + d_exp + 1;
-  val = dround(val, shift);
-  err = dround(err, shift);
+  double val_ = dround(val, shift);
+  double err_ = dround(err, shift);
 
   // Get cutted strings
   int d = MAX(0, d_exp + 1);
-  dtostr(val, d, valstr);
-  dtostr(err, 1, errstr);
+  dtostr(val_, d, valstr);
+  dtostr(err_, 1, errstr);
 
   // Round to first nonzero place of err
   if (getDigit(errstr[0]) > 2) {
     --shift; d = MAX(d - 1, 0);
-    val = dround(val, shift);
-    err = dround(err, shift);
-    dtostr(val, d, valstr);
-    dtostr(err, 0, errstr);
+    val_ = dround(val, shift);
+    err_ = dround(err, shift);
+    dtostr(val_, d, valstr);
+    dtostr(err_, 0, errstr);
   }
 
   // Update exponents (may change after rounding)
@@ -254,8 +254,8 @@ void _sigval_fix_mul3(double val, double err, char* valstr, char* errstr, char* 
     int valExp = atoi(valstr + 18);
 
     // Round and get cutted string
-    val = dround(val, -valExp + d);
-    dtostr(val, d, valstr);
+    double val_ = dround(val, -valExp + d);
+    dtostr(val_, d, valstr);
 
     // Shift
     int fixShift = 0;
@@ -286,21 +286,21 @@ void _sigval_fix_mul3(double val, double err, char* valstr, char* errstr, char* 
   // Round to second nonzero place of err
   int d_exp = valExp - errExp;
   int shift = -valExp + d_exp + 1;
-  val = dround(val, shift);
-  err = dround(err, shift);
+  double val_ = dround(val, shift);
+  double err_ = dround(err, shift);
 
   // Get cutted strings
   int d = MAX(0, d_exp + 1);
-  dtostr(val, d, valstr);
-  dtostr(err, 1, errstr);
+  dtostr(val_, d, valstr);
+  dtostr(err_, 1, errstr);
 
   // Round to first nonzero place of err
   if (getDigit(errstr[0]) > 2) {
     --shift; --d;
-    val = dround(val, shift);
-    err = dround(err, shift);
-    dtostr(val, d, valstr);
-    dtostr(err, 0, errstr);
+    val_ = dround(val, shift);
+    err_ = dround(err, shift);
+    dtostr(val_, d, valstr);
+    dtostr(err_, 0, errstr);
   }
 
   // Shift errstr, so the exponend matches val
