@@ -12,6 +12,7 @@ minfloat = 1e-80 # replaces zeros in linreg
 linspace_res = 2000 # resolution for nplinspace
 
 # Variables for export
+abs = np.abs
 sqrt = np.sqrt
 exp = np.exp
 ln = np.log
@@ -224,7 +225,7 @@ def lst(val, err=[], name='', unit='', prefix=True, expToFix=None):
     tmp = sigval(val[i], err[i], True, lstExp)
     entry = tmp[0].rjust(valmaxlen)
     if (tmp[1] != ''):
-      entry += ' ± ' + tmp[1].rjust(errmaxlen)
+      entry += ' ± ' + tmp[1].ljust(errmaxlen)
     elif (errmaxlen != 0):
       entry += ''.ljust(errmaxlen + 3)
     adjust = (colWidth + len(entry)) // 2
@@ -466,7 +467,7 @@ class pltext:
   def savefigs(path):
     # Save figures in 'path' as figN.pdf, where N is the figures number
     for i in plt.get_fignums():
-      plt.figure(i).savefig(path + '/fig' + str(i) +'.pdf', papertype='a4', orientation='landscape', bbox_inches='tight', pad_inches=0.3, format='pdf')
+      plt.figure(i).savefig(path + '/fig' + str(i) +'.pdf', papertype='a4', orientation='landscape', bbox_inches='tight', pad_inches=0.6, format='pdf')
 
 def linreg(x, y, dy, dx=None, fit_range=None, plot=False, graphname='', legend=False, scaleReg=False):
   # Set fit range if None
@@ -574,7 +575,7 @@ def fit(x, y, dy, f, p0=None, fit_range=None, plot=True):
   dy_fit = [dy[i] for i in fit_range]
   p, d_p = curve_fit(f, x_fit, y_fit, sigma=dy_fit, p0=p0)
   if plot:
-    xint = np.linspace(np.min(x), np.max(x), 1000)
+    xint = nplinspace(np.min(x), np.max(x))
     yfit = f(xint, *p)
     data_plot = pltext.plotdata(x, y, dy)
     color = data_plot[0].get_color()
