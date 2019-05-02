@@ -1,6 +1,6 @@
 from distutils.core import setup, Extension
 
-sigval = Extension('sigval', sources=['src/sigval.c'])
+sigval = Extension('sigval', sources=['src/sigval.c'], include_dirs=['pyinc'])
 setup(
   name = 'Significant value',
   version='1.0',
