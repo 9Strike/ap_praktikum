@@ -1,12 +1,12 @@
-# pycache
-*__pycache__
-
 # vscode
+*__pycache__
 *.vscode
 
 # Local folders for caching figures and store measured data
 figures
 data
 
-# test file to play around
+# test and tmp files
+*main.cpp
+*tmp
 test.py
