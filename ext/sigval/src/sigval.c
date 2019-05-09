@@ -198,10 +198,10 @@ void _sigval_fix(double val, double err, double fixExp, char* valstr, char* errs
   // Update exponents (may change after rounding)
   char valstr_[0x40];
   char expstr_[0x40];
-  sprintf(valstr_, "%.0e", val);
-  sprintf(expstr_, "%.0e", err);
-  valExp = atoi(valstr_ + 2);
-  errExp = atoi(expstr_ + 2);
+  sprintf(valstr_, "%.15e", val);
+  sprintf(expstr_, "%.15e", err);
+  valExp = atoi(valstr_ + 18);
+  errExp = atoi(expstr_ + 18);
   d_exp = valExp - errExp;
 
   // Shift errstr, so the exponend matches val

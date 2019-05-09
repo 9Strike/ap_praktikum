@@ -107,23 +107,24 @@ def lst(val, err=[], name='', unit='', prefix=True, expToFix=None):
   # Create title, center title and write to out
   out = []
   title = ''
-  if (name != ''):
+  if name != '':
     title += name
-  if unit != '' or lstExp != 0:
+  if unit != '' and lstExp != 0:
     title += ' / '
-    if prefix and unit != '':
+    if prefix:
       p = lstExp // 3
-      if p == 0:
-        title += unit
-      else:
-        if p > 0:
-          p -= 1
-        title += unitPrefixes[p] + unit
+      uPrefix = ''
+      if p > 0:
+        uPrefix = unitPrefixes[p - 1]
+      elif p < 0:
+        uPrefix = unitPrefixes[p]
+      title += uPrefix + unit
     else:
-      if unit != '':
-        title += '(' + 'e' + str(lstExp) + ' ' + unit + ')'
-      else:
-        title += 'e' + str(lstExp) + ' ' + unit
+      title += '(' + 'e' + str(lstExp) + ' ' + unit + ')'
+  elif unit != '':
+    title += ' / ' + unit
+  elif lstExp != 0:
+    title += ' / ' + 'e' + str(lstExp)
   colWidth = max(colWidth, len(title))
   adjust = (colWidth + len(title)) // 2
   out.append(title.rjust(adjust))

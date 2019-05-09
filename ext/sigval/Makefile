@@ -4,13 +4,13 @@ first: sigval
 
 # As C++ program
 sigval: main.o sigval.o
-	g++ -g tmp/main.o tmp/sigval.o -o bin/sigval
+	g++ tmp/main.o tmp/sigval.o -o bin/sigval
 
 main.o:
-	g++ -c src/main.cpp -o tmp/main.o $(INC)
+	g++ -g -c src/main.cpp -o tmp/main.o $(INC)
 
 sigval.o:
-	g++ -c src/sigval.c -o tmp/sigval.o $(INC)
+	g++ -g -c src/sigval.c -o tmp/sigval.o $(INC)
 
 clean:
 	rm bin/sigval
