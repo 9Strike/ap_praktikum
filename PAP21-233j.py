@@ -2,8 +2,10 @@ import datplot as dp
 import datstr as ds
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.constants as cs
 from numpy import pi, sqrt, sin, cos, sinc
 from scipy.integrate import quad
+from scipy.signal import argrelmax, argrelmin, argrelextrema
 
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
@@ -21,6 +23,7 @@ def dat_overlap(arr, d_arr, cut, lshift):
   return arr_, d_arr_
 
 ## Measured data
+
 # Maxima, minima of the single slit fourier image
 n_sf = fa([0, 1, 1, 2, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6])
 I_ug_sf = 72.0
@@ -51,7 +54,6 @@ d_I_min_sf = d_I_sf[1::2]
 x_min_sf = x_sf[1::2]
 d_x_min_sf = d_x_sf[1::2]
 
-# n_max_sf = n_sf[::2]
 I_max_sf = I_sf[::2]
 d_I_max_sf = d_I_sf[::2]
 x_max_sf = x_sf[::2]
@@ -87,16 +89,15 @@ d_I_min_df = d_I_df[1::2]
 x_min_df = x_df[1::2]
 d_x_min_df = d_x_df[1::2]
 
-# n_max_df = n_df[::2]
 I_max_df = I_df[::2]
 d_I_max_df = d_I_df[::2]
 x_max_df = x_df[::2]
 d_x_max_df = d_x_df[::2]
 
-# Abscissa calibration with the single slit
+# Abscissa calibration (single slit)
 n_sc = fa([1, 2, 3, 4])
-d_sc = fa([0.235, 0.440, 0.650, 0.860])
-d_d_sc = fa([0.005, 0.005, 0.005, 0.005])
+d_sc = 2 * fa([0.235, 0.440, 0.650, 0.860]) * cs.milli
+d_d_sc = 2 * fa([0.005, 0.005, 0.005, 0.005]) * cs.milli
 
 # Single slit object image
 I1_so = fa([1580, 90])
@@ -106,9 +107,9 @@ d_I1_so = fa([40, 3])
 d_I2_so = fa([20, 20, 5])
 d_I3_so = fa([30, 30, 50, 5])
 
-I1_i_max = np.argmax(I1_so)[0]
-I2_i_max = np.argmax(I2_so)[0]
-I3_i_max = np.argmax(I3_so)[0]
+I1_i_max = np.argmax(I1_so)
+I2_i_max = np.argmax(I2_so)
+I3_i_max = np.argmax(I3_so)
 d_I1_so = I1_so / I1_so[I1_i_max] * sqrt((d_I1_so / I1_so)**2 + (d_I1_so[I1_i_max] / I1_so[I1_i_max])**2)
 d_I2_so = I2_so / I2_so[I2_i_max] * sqrt((d_I2_so / I2_so)**2 + (d_I2_so[I2_i_max] / I2_so[I2_i_max])**2)
 d_I3_so = I3_so / I3_so[I3_i_max] * sqrt((d_I3_so / I3_so)**2 + (d_I3_so[I3_i_max] / I3_so[I3_i_max])**2)
@@ -120,23 +121,45 @@ x1_so = 939
 d_x1_so = 3
 x2_so = 1070
 d_x2_so = 3
-b_so = 682
-d_b_so = 5
-f_so = 80
+b_so = 682 * cs.milli
+d_b_so = 5 * cs.milli
+f_so = 80 * cs.milli
+
+w_so = x2_so - x1_so
+d_w_so = sqrt(d_x1_so**2 + d_x2_so**2)
+
+# Abcissa calibration (double slit)
+n_dc = fa([0.25, 0.75, 1.75, 2.25])
+d_dc = fa([0.12, 0.32, 0.46, 0.70]) * cs.milli
+d_d_dc = fa([0.01, 0.01, 0.01, 0.01]) * cs.milli
 
 ## Evaluation
-# Single slit fourier image
-dp.initplot(num=1, title=r'Positionen $x$ der Minima und Maxima eines Einzelspaltes in Abhängigkeit der Ordnung $n$.', xlabel=r'$n$', ylabel=r'$x$ / px')
-s, d_s, b, d_b = dp.linreg(n_min_sf, x_min_sf, d_x_min_sf, plot=True)
-n_max_sf = (x_max_sf - b) / s
-d_n_max_sf = abs(n_max_sf) * sqrt((d_x_max_sf**2 + d_b**2) / (x_max_sf - b)**2 + (d_s / s)**2)
+
+# Abscissa calibration (single slit)
+dp.initplot(title=r'', xlabel=r'n', ylabel=r'$d$ / mm')
+s_sc, d_s_sc, b_sc, d_b_sc = dp.linreg(n_sc, d_sc, d_d_sc, plot=True)
+
+# Abscissa calibration (double slit)
+dp.initplot(title=r'', xlabel=r'n', ylabel=r'$d$ / mm')
+s_dc, d_s_dc, b_dc, d_b_dc = dp.linreg(n_dc, d_dc, d_d_dc, plot=True)
+
+# 1. Single slit fourier image
+dp.initplot(title=r'Positionen $x$ der Minima und Maxima eines Einzelspaltes in Abhängigkeit der Ordnung $n$.', xlabel=r'$n$', ylabel=r'$x$ / px')
+s_sf, d_s_sf, b_sf, d_b_sf = dp.linreg(n_min_sf, x_min_sf, d_x_min_sf, plot=True)
+n_max_sf = (x_max_sf - b_sf) / s_sf
+d_n_max_sf = abs(n_max_sf) * sqrt((d_x_max_sf**2 + d_b_sf**2) / (x_max_sf - b_sf)**2 + (d_s_sf / s_sf)**2)
 dp.plotdata(n_max_sf, x_max_sf, d_x_max_sf, d_n_max_sf)
+
+w_slit = -w_so * s_sc / s_sf
+d_w_slit = w_slit * sqrt((d_w_so / w_so)**2 + (d_s_sc / s_sc)**2 + (d_s_sf / s_sf)**2)
 
 n_max_sf_theo = np.arange(0.5, 0.5 + len(n_max_sf))
 n_max_sf_theo[0] = 0.0
 I_max_sf_theo = sinc(n_max_sf)**2
 d_I_max_sf_theo = 2 * abs((sinc(n_max_sf) - cos(pi * n_max_sf)) * sinc(n_max_sf) * d_n_max_sf / n_max_sf)
 
+print()
+print(ds.val('w', w_slit, d_w_slit, unit='m'))
 print()
 print(ds.tbl([
   ds.lst(n_max_sf, d_n_max_sf, name='n_o', expToFix=0),
@@ -149,37 +172,47 @@ print(ds.tbl([
   ds.sig('I_o, I_t', I_max_sf, d_I_max_sf, I_max_sf_theo, d_I_max_sf_theo, perc=True)
 ]))
 
-# Double slit fourier image
+# 2. Double slit fourier image
 
 
-# Single slit object image
-def slit(n, y):
+# 3. Single slit object image
+def E_slit(n, y):
   return 2 * sinc(n) * cos(2 * pi * n * y)
 
-n_so = 3
-y_so = np.linspace(-1, 1, 1000)
+dp.initplot(nrows=2, ncols=2, title=r'', xlabel=r'$y$ / $d$', ylabel=r'$I$ / b.E.')
+for n_so in range(1, 4):
+  y_so = np.linspace(-1, 1, 100)
 
-I_so = np.array([quad(lambda n: slit(n, y), 0, n_so) for y in y_so])
-I_so = np.array([x[0]**2 for x in I_so])
-I_so = I_so / np.max(I_so)
+  I_so = np.array([quad(lambda n: E_slit(n, y), 0, n_so) for y in y_so])
+  I_so = np.array([x[0]**2 for x in I_so])
+  I_so = I_so / np.max(I_so)
 
-dp.initplot(num=2, title=r'', xlabel=r'$y$ / $d$', ylabel=r'$I$ / b.E.')
-dp.plot(y_so, I_so)
+  dp.set_axis(n_so - 1)
+  dp.plot(y_so, I_so)
 
-# Double slit object image
-def dslit(n, y, g):
+# 4. Double slit object image
+def E_dslit(n, y, g):
   return 4 * sinc(n) * cos(pi * n * g) * cos(2 * pi * n * y)
 
 g_do = 2
-n_do = 3
+n_do_a = 1.0
+n_do_b = 0.335
 y_do = np.linspace(-2, 2, 1000)
 
-I_do = np.array([quad(lambda n: dslit(n, y, g_do), 0, n_do) for y in y_do])
-I_do = np.array([x[0]**2 for x in I_do])
-I_do = I_do / np.max(I_do)
+I_do_a = np.array([quad(lambda n: E_dslit(n, y, g_do), 0, n_do_a) for y in y_do])
+I_do_a = np.array([x[0]**2 for x in I_do_a])
+I_do_a = I_do_a / np.max(I_do_a)
 
-dp.initplot(num=3, title=r'', xlabel=r'$y$ / $d$', ylabel=r'$I$ / b.E.')
-dp.plot(y_do, I_do)
+I_do_b = np.array([quad(lambda n: E_dslit(n, y, g_do), 0, n_do_b) for y in y_do])
+I_do_b = np.array([x[0]**2 for x in I_do_b])
+I_do_b = I_do_b / np.max(I_do_b)
+
+dp.initplot(ncols=2, title=r'', xlabel=r'$y$ / $d$', ylabel=r'$I$ / b.E.')
+plt.ylim(0, 1)
+dp.set_axis(0)
+dp.plot(y_do, I_do_a)
+dp.set_axis(1)
+dp.plot(y_do, I_do_b)
 
 # Show plots
 plt.show()
