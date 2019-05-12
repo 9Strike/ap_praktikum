@@ -47,6 +47,11 @@ def initplot(num=0, nrows=1, ncols=1, title='', xlabel='', ylabel='', scale='lin
 def set_axis(num):
   plt.sca(plt.gcf().axes[num])
 
+def plot(x, y, label='', color=None):
+  plot = plt.plot(x, y, label=label, color=color)
+  if label != '':
+    plt.legend()
+  return plot
 
 def plotdata(x, y, dy=None, dx=None, label='', color=None, connect=False):
   plot = plt.errorbar(x=x, y=y, yerr=dy, xerr=dx, label=label, color=color, fmt='o', markersize=3, capsize=5)
@@ -57,7 +62,7 @@ def plotdata(x, y, dy=None, dx=None, label='', color=None, connect=False):
     if (color == None):
       color = plot[0].get_color()
     plt.plot(x, y, color=color)
-  if (label != ''):
+  if label != '':
     plt.legend()
   return plot
 
