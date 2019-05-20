@@ -36,7 +36,7 @@ px = 14 * cs.micro
 # Maxima, minima of the single slit fourier image
 n_sf = fa([0, 1, 1, 2, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6])
 I_ug_sf = 72.0
-d_I_ug_sf = 14.0
+d_I_ug_sf = 14.00
 I_sf = fa([3700, 90, 290, 84, 3340, 130, 1330, 110, 640, 100, 410, 96, 287, 99])
 d_I_sf = fa([50, 10, 20, 10, 50, 20, 40, 20, 30, 20, 30, 10, 30, 10])
 x_sf = fa([1073, 992, 955, 913, 957, 912, 877, 834, 794, 755, 717, 676, 639, 598])
@@ -103,7 +103,7 @@ I_sf_ = np.concatenate((
 ))
 d_I_sf_ = np.concatenate((
   I_sf_[:4] * sqrt((d_I_sf[:4] / I_sf[:4])**2 + (d_I_sf[0] / I_sf[0])**2),
-  I_sf_[4:] * sqrt((d_I_sf[4:] / I_sf[4:])**2 + (d_I_sf[4] / I_sf[4])**2 + (d_I_sf[2] / I_sf[2])**2 + (d_I_sf[0] / I_sf[0])**2)
+  I_sf_[4:] * sqrt((d_I_sf[4:] / I_sf[4])**2 + (d_I_sf[4] / I_sf[4])**2 + (d_I_sf[2] / I_sf[2])**2 + (d_I_sf[0] / I_sf[0])**2)
 ))
 
 n_sf = np.concatenate((n_sf[:4], n_sf[6:]))
@@ -167,11 +167,11 @@ d_wpx1_do = sqrt(d_x1_do**2 + d_x2_do**2)
 wpx2_do = x4_do - x3_do
 d_wpx2_do = sqrt(d_x3_do**2 + d_x4_do**2)
 
-gpx_do = x3_do - x2_do
-d_gpx_do = sqrt(d_x2_do**2 + d_x3_do**2)
+gpx_do = x3_do - x2_do + wpx1_do / 2 + wpx2_do / 2
+d_gpx_do = sqrt(d_x2_do**2 + d_x3_do**2 + (d_wpx1_do**2 + d_wpx2_do**2) / 4)
 
 M_do = b_do / f - 1
-d_M_do = d_b_so / f
+d_M_do = d_b_do / f
 w1_do = wpx1_do * px / M_do
 d_w1_do = w1_do * sqrt((d_wpx1_do / wpx1_do)**2 + (d_M_do / M_do)**2)
 w2_do = wpx2_do * px / M_do
@@ -182,11 +182,13 @@ d_w_mean_do = sqrt(d_w1_do**2 + d_w2_do**2) / 2
 g_do = gpx_do * px / M_do
 d_g_do = g_do * sqrt((d_gpx_do / gpx_do)**2 + (d_M_do / M_do)**2)
 
+
 ## Evaluation
 
 # Abscissa calibration (single slit)
-dp.initplot(title=r'', xlabel=r'n', ylabel=r'$d$ / mm')
-s_sc, d_s_sc, b_sc, d_b_sc = dp.linreg(n_sc, d_sc, d_d_sc, plot=True)
+i_min_sc = np.array(n_sc - 1, dtype=int)
+dp.initplot(title=r'', xlabel=r'$x$ / px', ylabel=r'$d$ / mm')
+s_sc, d_s_sc, b_sc, d_b_sc = dp.linreg(x_min_sf[i_min_sc], d_sc, d_d_sc, d_x_min_sf[i_min_sc], plot=True)
 
 # 1. Single slit fourier image
 dp.initplot(title=r'Positionen $x$ der Minima und Maxima eines Einzelspaltes in Abhängigkeit der Ordnung $n$.', xlabel=r'$n$', ylabel=r'$x$ / px')
@@ -195,26 +197,15 @@ n_max_sf = (x_max_sf - b_sf) / s_sf
 d_n_max_sf = abs(n_max_sf) * sqrt((d_x_max_sf**2 + d_b_sf**2) / (x_max_sf - b_sf)**2 + (d_s_sf / s_sf)**2)
 dp.plotdata(n_max_sf, x_max_sf, d_x_max_sf, d_n_max_sf)
 
-w_sf = -wpx_so * s_sc / s_sf
-d_w_sf = w_sf * sqrt((d_wpx_so / wpx_so)**2 + (d_s_sc / s_sc)**2 + (d_s_sf / s_sf)**2)
+# w_sf = -wpx_so * s_sc / s_sf
+# d_w_sf = w_sf * sqrt((d_wpx_so / wpx_so)**2 + (d_s_sc / s_sc)**2 + (d_s_sf / s_sf)**2)
+w_sf = 2 * lda * f / (s_sc * s_sf)
+d_w_sf = w_sf * sqrt((d_s_sc / s_sc)**2 + (d_s_sf / s_sf)**2)
 
 n_max_sf_theo = np.arange(0.5, 0.5 + len(n_max_sf))
 n_max_sf_theo[0] = 0.0
 I_max_sf_theo = sinc(n_max_sf)**2
 d_I_max_sf_theo = 2 * abs((sinc(n_max_sf) - cos(pi * n_max_sf)) * sinc(n_max_sf) * d_n_max_sf / n_max_sf)
-
-print()
-print(ds.tbl([
-  ds.lst(n_max_sf, d_n_max_sf, name='n_o', expToFix=0),
-  ds.lst(n_max_sf_theo, name='n_t', expToFix=0),
-  ds.sig('n_o, n_t', n_max_sf, d_n_max_sf, n_max_sf_theo, perc=True)
-]))
-print(ds.tbl([
-  ds.lst(I_max_sf, d_I_max_sf, name='I_o', unit='I0', prefix=False, expToFix=0),
-  ds.lst(I_max_sf_theo, d_I_max_sf_theo, name='I_t', unit='I0', prefix=False, expToFix=0),
-  ds.sig('I_o, I_t', I_max_sf, d_I_max_sf, I_max_sf_theo, d_I_max_sf_theo, perc=True)
-]))
-print()
 
 # 2. Double slit fourier image
 def I_slit(n):
@@ -231,13 +222,6 @@ d_n_max_df_theo = n_max_df_theo * d_v_df / v_df
 I_max_df_theo = I_slit(n_max_df_theo)
 # d_I_max_df_theo = 
 
-print(ds.tbl([
-  ds.lst(I_max_df, d_I_max_df, name='I_o', unit='I0', prefix=False, expToFix=0),
-  ds.lst(I_max_df_theo, name='I_t', unit='I0', prefix=False, expToFix=0),
-  ds.sig('I_o, I_t', I_max_df, d_I_max_df, I_max_df_theo, perc=True)
-]))
-print()
-
 dp.initplot(title=r'', xlabel=r'$n$', ylabel=r'$I$ / b.E.')
 dp.plot(n_df, I_slit(n_df), label='Einzelspalt')
 dp.plot(n_df, I_dslit(n_df, v_df), label='Doppelspalt')
@@ -247,30 +231,26 @@ def E_slit(n, y):
   return 2 * sinc(n) * cos(2 * pi * n * y)
 
 dp.initplot(nrows=2, ncols=2, title=r'', xlabel=r'$y$ / $d$', ylabel=r'$I$ / b.E.')
-for n_so in range(1, len(I_so) + 1):
+I_so_theo = np.zeros_like(I_so)
+for i in range(len(I_so)):
   y_so = np.linspace(-1, 1, 100)
 
-  I_t_so = np.array([quad(lambda n: E_slit(n, y), 0, n_so) for y in y_so])
-  I_t_so = np.array([x[0]**2 for x in I_t_so])
-  I_t_so = I_t_so / np.max(I_t_so)
+  I_cont_so = np.array([quad(lambda n: E_slit(n, y), 0, i + 1) for y in y_so])
+  I_cont_so = np.array([x[0]**2 for x in I_cont_so])
+  I_cont_so = I_cont_so / np.max(I_cont_so)
 
   # Super ugly code to perform the super ugly task of finding the peaks
-  I_i_max_so = find_peaks(I_t_so)[0]
-  I_i_min_so = find_peaks(-I_t_so)[0]
+  I_i_max_so = find_peaks(I_cont_so)[0]
+  I_i_min_so = find_peaks(-I_cont_so)[0]
   I_i_so = np.concatenate((I_i_max_so, I_i_min_so))
-  I_peaks_so = I_t_so[I_i_so]
+  I_peaks_so = I_cont_so[I_i_so]
   I_peaks_so = np.unique(np.round(I_peaks_so[I_peaks_so>0.01], decimals=10))
-  if n_so == 3:
+  if i == 2:
     I_peaks_so[0], I_peaks_so[1] = I_peaks_so[1], I_peaks_so[0]
+  I_so_theo[i] = I_peaks_so
 
-  print(ds.tbl([
-    ds.lst(I_so[n_so - 1], d_I_so[n_so - 1], name='I_exp', unit='I_max', prefix=False, expToFix=0),
-    ds.lst(I_peaks_so, name='I_theo', unit='I_max', prefix=False, expToFix=0),
-    ds.sig('I_exp, I_theo', I_so[n_so - 1], d_I_so[n_so - 1], I_peaks_so, perc=True)
-  ]))
-
-  dp.set_axis(n_so - 1)
-  dp.plot(y_so, I_t_so)
+  dp.set_axis(i)
+  dp.plot(y_so, I_cont_so)
 
 # 4. Double slit object image
 def E_dslit(n, y, g):
@@ -296,19 +276,49 @@ dp.plot(y_do, I_do_a)
 dp.set_axis(1)
 dp.plot(y_do, I_do_b)
 
-n_do_exp_b = sin(np.arctan(d_b_do / f)) * w_sf / lda
-d_n_do_exp_b = f**2 * d_d_b_do / sqrt(d_b_do**2 + f**2)**3
+n_do_exp_b = d_b_do * w_mean_do / (2 * f * lda)
+d_n_do_exp_b = n_do_exp_b * sqrt((d_d_b_do / d_b_do)**2 + (d_w_mean_do / w_mean_do)**2)
+
+## Print
+print()
+print(ds.tbl([
+  ds.lst(n_max_sf, d_n_max_sf, name='n_o', expToFix=0),
+  ds.lst(n_max_sf_theo, name='n_t', expToFix=0),
+  ds.sig('n_o, n_t', n_max_sf, d_n_max_sf, n_max_sf_theo, perc=True)
+]))
+print(ds.tbl([
+  ds.lst(I_max_sf, d_I_max_sf, name='I_o', unit='I0', prefix=False, expToFix=0),
+  ds.lst(I_max_sf_theo, d_I_max_sf_theo, name='I_t', unit='I0', prefix=False, expToFix=0),
+  ds.sig('I_o, I_t', I_max_sf, d_I_max_sf, I_max_sf_theo, d_I_max_sf_theo, perc=True)
+]))
+print()
+
+
+print(ds.tbl([
+  ds.lst(I_max_df, d_I_max_df, name='I_o', unit='I0', prefix=False, expToFix=0),
+  ds.lst(I_max_df_theo, name='I_t', unit='I0', prefix=False, expToFix=0),
+  ds.sig('I_o, I_t', I_max_df, d_I_max_df, I_max_df_theo, perc=True)
+]))
+print()
+
+
+for i in range(len(I_so)):
+  print(ds.tbl([
+    ds.lst(I_so[i], d_I_so[i], name='I_exp', unit='I_max', prefix=False, expToFix=0),
+    ds.lst(I_so_theo[i], name='I_theo', unit='I_max', prefix=False, expToFix=0),
+    ds.sig('I_exp, I_theo', I_so[i], d_I_so[i], I_so_theo[i], perc=True)
+  ]))
+
+
+print(ds.val('w', w_sf, d_w_sf, unit='m'))
+print(ds.val('w', w_so, d_w_so, unit='m'))
+print(ds.sig('w', w_sf, d_w_sf, w_so, d_w_so, perc=True))
+print()
 
 print(ds.val('n_exp', n_do_exp_b, d_n_do_exp_b))
 print(ds.val('n_theo', n_do_b))
 print(ds.sig('n_exp, n_theo', n_do_exp_b, d_n_do_exp_b, n_do_b, perc=True))
 print()
 
-# Print
-print(ds.val('w', w_sf, d_w_sf, unit='m'))
-print(ds.val('w', w_so, d_w_so, unit='m'))
-print(ds.sig('w', w_sf, d_w_sf, w_so, d_w_so, perc=True))
-print()
-
-# Show plots
+## Show plots
 plt.show()
