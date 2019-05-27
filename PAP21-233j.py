@@ -11,6 +11,8 @@ from scipy.signal import find_peaks
 
 ## General
 
+print()
+
 fa = lambda a: np.array(a, dtype=float)
 
 # The cut is performed after cut as index. lshift = 0 returns original array.
@@ -22,6 +24,18 @@ def dat_overlap(arr, d_arr, cut, lshift):
   d_arr_ = np.concatenate((d_arr[:c-s], sqrt(d_arr[c-s:c]**2 + d_arr[c:c+s]**2) / 2))
   d_arr_ = np.concatenate((d_arr_, d_arr[c+s:]))
   return arr_, d_arr_
+
+plotTitles = [
+  r'Lineare Regression der Analysierspaltbreite $d$ in Abhängigkeit der Position $x$' '\n'
+    r'der jeweiligen gerade so verdeckten Minima.',
+  r'Positionen $x$ der Minima und Maxima des Einzelspaltes in Abhängigkeit der Ordnung $n$.',
+  r'Intensität $I$ des Doppelspalt-Fourierbilds in Abhängigkeit der Beugungsordnung $n$' '\n'
+    r'mit dem Fourierbild des Einzelspalts als Referenz',
+  r'Intensität $I$ des Einzelspalt-Objektbilds in Abhängigkeit der Position $y$' '\n'
+    r'unter Beachtung von einer bis drei Beugungsordnungen',
+  r'Intensität $I$ des Doppelspalt-Objektbilds in Abhängigkeit der Position $y$' '\n'
+    r'im Fall (a) (doppeltes Gaußprofil) und im Fall (b) (Plateau)'
+]
 
 
 
@@ -79,10 +93,10 @@ d_x4_do = 15
 b_do = 137 * cs.milli
 d_b_do = 3 * cs.milli
 
-d_a_do = 0.23 * cs.milli
-d_d_a_do = 0.01 * cs.milli
-d_b_do = 0.12 * cs.milli
-d_d_b_do = 0.01 * cs.milli
+w_a_do = 0.23 * cs.milli
+d_w_a_do = 0.01 * cs.milli
+w_b_do = 0.12 * cs.milli
+d_w_b_do = 0.01 * cs.milli
 
 
 # Abscissa calibration (single slit)
@@ -164,6 +178,11 @@ d_M_so = d_b_so / f
 w_so = wpx_so * px / M_so
 d_w_so = w_so * sqrt((d_wpx_so / wpx_so)**2 + (d_M_so / M_so)**2)
 
+print(ds.val('M', M_so, d_M_so))
+print(ds.val('w_px', wpx_so, d_wpx_so, prefix=False, unit='px'))
+print(ds.val('w', w_so, d_w_so, unit='m'))
+print()
+
 
 # Double slit object image
 wpx1_do = x2_do - x1_do
@@ -186,6 +205,16 @@ d_w_mean_do = sqrt(d_w1_do**2 + d_w2_do**2) / 2
 g_do = gpx_do * px / M_do
 d_g_do = g_do * sqrt((d_gpx_do / gpx_do)**2 + (d_M_do / M_do)**2)
 
+print(ds.val('M', M_do, d_M_do))
+print(ds.val('w1_px', wpx1_do, d_wpx1_do, prefix=False, unit='px'))
+print(ds.val('w2_px', wpx2_do, d_wpx2_do, prefix=False, unit='px'))
+print(ds.val('g_px', gpx_do, d_gpx_do, prefix=False, unit='px'))
+print(ds.val('w1', w1_do, d_w1_do, unit='m'))
+print(ds.val('w2', w2_do, d_w2_do, unit='m'))
+print(ds.val('w', w_mean_do, d_w_mean_do, unit='m'))
+print(ds.val('g', g_do, d_g_do, unit='m'))
+print()
+
 
 
 ## Evaluation
@@ -205,12 +234,20 @@ def dslit_mod_kernel(n, y, g):
 
 # Abscissa calibration (single slit)
 i_min_sc = np.array(n_sc - 1, dtype=int)
-dp.initplot(title=r'', xlabel=r'$x$ / px', ylabel=r'$d$ / mm')
-s_sc, d_s_sc, b_sc, d_b_sc = dp.linreg(x_min_sf[i_min_sc], d_sc, d_d_sc, d_x_min_sf[i_min_sc], plot=True)
+dp.initplot(num=2, title=plotTitles[0], xlabel=r'$x$ / px', ylabel=r'$d$ / mm', fignum=True)
+s_sc, d_s_sc, b_sc, d_b_sc = dp.linreg(x_min_sf[i_min_sc], d_sc / cs.milli, d_d_sc / cs.milli, d_x_min_sf[i_min_sc], plot=True)
+s_sc *= cs.milli
+d_s_sc *= cs.milli
+b_sc *= cs.milli
+d_b_sc *= cs.milli
+
+print(ds.val('s', s_sc, d_s_sc, unit='m / px'))
+print(ds.val('b', b_sc, d_b_sc, unit='m'))
+print()
 
 
 # 1. Single slit fourier image
-dp.initplot(title=r'Positionen $x$ der Minima und Maxima eines Einzelspaltes in Abhängigkeit der Ordnung $n$.', xlabel=r'$n$', ylabel=r'$x$ / px')
+dp.initplot(num=1, title=plotTitles[1], xlabel=r'$n$', ylabel=r'$x$ / px', fignum=True)
 s_sf, d_s_sf, b_sf, d_b_sf = dp.linreg(n_min_sf, x_min_sf, d_x_min_sf, plot=True)
 n_max_sf = (x_max_sf - b_sf) / s_sf
 d_n_max_sf = abs(n_max_sf) * sqrt((d_x_max_sf**2 + d_b_sf**2) / (x_max_sf - b_sf)**2 + (d_s_sf / s_sf)**2)
@@ -224,6 +261,8 @@ n_max_sf_theo[0] = 0.0
 I_max_sf_theo = I_slit(n_max_sf)
 d_I_max_sf_theo = d_I_slit(n_max_sf, d_n_max_sf)
 
+print(ds.val('s', s_sf, d_s_sf, prefix=False, unit='px'))
+print(ds.val('b', b_sf, d_b_sf, prefix=False, unit='px'))
 print()
 print(ds.tbl([
   ds.lst(n_max_sf, d_n_max_sf, name='n_o', expToFix=0),
@@ -246,9 +285,8 @@ d_v_df = v_df * sqrt((d_g_do / g_do)**2 + (d_w_mean_do / w_mean_do)**2)
 n_max_df_theo = fa([0, 1, 2, 4]) / v_df
 d_n_max_df_theo = n_max_df_theo * d_v_df / v_df
 I_max_df_theo = I_dslit(n_max_df_theo, v_df)
-# d_I_max_df_theo = 
 
-dp.initplot(title=r'', xlabel=r'$n$', ylabel=r'$I$ / b.E.')
+dp.initplot(num=3, title=plotTitles[2], xlabel=r'$n$', ylabel=r'$I$ / b.E.', fignum=True)
 dp.plot(n_df, I_slit(n_df), label='Einzelspalt')
 dp.plot(n_df, I_dslit(n_df, v_df), label='Doppelspalt')
 
@@ -261,7 +299,7 @@ print()
 
 
 # 3. Single slit object image
-dp.initplot(nrows=2, ncols=2, title=r'', xlabel=r'$y$ / $d$', ylabel=r'$I$ / b.E.')
+dp.initplot(num=4, nrows=2, ncols=2, title=plotTitles[3], xlabel=r'$y$ / $d$', ylabel=r'$I$ / b.E.', fignum=True)
 I_so_theo = np.zeros_like(I_so)
 for i in range(len(I_so)):
   y_so = np.linspace(-1, 1, 100)
@@ -305,15 +343,15 @@ I_do_b = np.array([quad(lambda n: dslit_mod_kernel(n, y, g_do), 0, n_do_b) for y
 I_do_b = np.array([x[0]**2 for x in I_do_b])
 I_do_b = I_do_b / np.max(I_do_b)
 
-dp.initplot(ncols=2, title=r'', xlabel=r'$y$ / $d$', ylabel=r'$I$ / b.E.')
+dp.initplot(num=5, ncols=2, title=plotTitles[4], xlabel=r'$y$ / $d$', ylabel=r'$I$ / b.E.', fignum=True)
 plt.ylim(0, 1)
 dp.set_axis(0)
 dp.plot(y_do, I_do_a)
 dp.set_axis(1)
 dp.plot(y_do, I_do_b)
 
-n_do_exp_b = d_b_do * w_mean_do / (2 * f * lda)
-d_n_do_exp_b = n_do_exp_b * sqrt((d_d_b_do / d_b_do)**2 + (d_w_mean_do / w_mean_do)**2)
+n_do_exp_b = w_b_do * w_mean_do / (2 * f * lda)
+d_n_do_exp_b = n_do_exp_b * sqrt((d_w_b_do / w_b_do)**2 + (d_w_mean_do / w_mean_do)**2)
 
 print(ds.val('n_exp', n_do_exp_b, d_n_do_exp_b))
 print(ds.val('n_theo', n_do_b))
@@ -330,4 +368,4 @@ print()
 
 
 ## Show plots
-plt.show()
+dp.savefigs('figures/233')
