@@ -34,3 +34,8 @@ def chi2_red(yo, dyo, ye, dye=[], dof=0):
   if (dof == 0):
     dof = len(ye)
   return chi2(yo, dyo, ye, dye) / dof
+
+def dev(yo, dyo, ye, dye=None):
+  if dye is None:
+    dye = np.zeros_like(dyo)
+  return np.abs(yo - ye) / sqrt(dyo**2 + dye**2)
