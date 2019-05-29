@@ -42,7 +42,7 @@ def initplot(num=0, nrows=1, ncols=1, title='', xlabel='', ylabel='', scale='lin
   fig.tight_layout()
   if nrows != 1 or ncols != 1:
     st.set_y(0.97)
-    fig.subplots_adjust(top=0.92)
+    fig.subplots_adjust(top=0.90)
 
 def set_axis(num):
   plt.sca(plt.gcf().axes[num])
