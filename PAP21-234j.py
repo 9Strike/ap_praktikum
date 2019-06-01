@@ -256,7 +256,7 @@ def lda2_func(m, E_Ry, E_3p, delta_s):
 isInLda2_na = np.in1d(lda_tl_na, lda2_tl_na)
 m2_na = m_na[isInLda2_na]
 lda2_ol_na = lda_ol_na[isInLda2_na]
-d_lda2_ol_na = d_lda_ol_na[isInLda2_na]
+d_lda2_o2l_na = d_lda_ol_na[isInLda2_na]
 
 # Print
 print(ds.val('E_Ry', -ER / cs.e, unit='eV'))
