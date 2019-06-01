@@ -236,7 +236,7 @@ def lda2_func(m, E_Ry, E_3p, delta_s):
 isInLda2_na = np.in1d(lda_tl_na, lda2_tl_na)
 m2_na = m_na[isInLda2_na]
 lda2_ol_na = lda_ol_na[isInLda2_na]
-d_lda2_ol_na = d_lda_ol_na[isInLda2_na]
+d_lda2_o2l_na = d_lda_ol_na[isInLda2_na]
 
 dp.initplot(num=7, title=titles[6], xlabel=r'$m$', ylabel=r'$\lambda$ / nm')
 popt2_na, d_popt2_na = dp.fit(m2_na, lda2_ol_na, d_lda2_ol_na, lda2_func, p0=[-13.6 * cs.e, -3 * cs.e, -0.02], plot=True)
