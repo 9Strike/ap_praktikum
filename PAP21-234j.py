@@ -6,6 +6,7 @@ import numpy as np
 import scipy.constants as cs
 
 from numpy import sqrt
+from scipy.stats import chi2
 
 
 
@@ -14,7 +15,6 @@ from numpy import sqrt
 print()
 
 titles = [
-  r'',
   r'',
   r'',
   r'',
@@ -92,7 +92,7 @@ lda2_ol_na = np.array([
 
 ### Data Preparation
 
-## Sun light
+## Sun lightcg
 lda_g *= cs.nano
 lda_sk *= cs.nano
 lda_s *= cs.nano
@@ -132,10 +132,10 @@ dp.plot(lda_s / cs.nano, I_s)
 
 # Print
 print(ds.tbl([
-  ds.lst(lda_fl_s, d_lda_fl_s, name='λ', unit='m'),
-  ds.lst(lda_fl_t_, name='λ_lit', unit='m'),
-  ds.dev(lda_fl_s, d_lda_fl_s, lda_fl_t_, name='λ, λ_lit', perc=True)
-]))
+  ds.lst(lda_fl_s, d_lda_fl_s, name='λ_O', unit='m'),
+  ds.lst(lda_fl_t_, name='λ_E', unit='m'),
+  ds.dev(lda_fl_s, d_lda_fl_s, lda_fl_t_, name='λ_O, λ_E', perc=True)
+], name='Observed and expected Fraunhofer lines'))
 print()
 
 
@@ -148,7 +148,7 @@ dp.initplot(num=5, title=titles[4], xlabel=r'$\lambda$ / nm', ylabel=r'$I$ / b.E
 plt.xlim(300, 540)
 dp.plot(lda_nw, I_nw)
 
-dp.initplot(num=5, title=titles[4], xlabel=r'$\lambda$ / nm', ylabel=r'$I$ / b.E.', scale='linlog')
+dp.initplot(num=6, title=titles[4], xlabel=r'$\lambda$ / nm', ylabel=r'$I$ / b.E.', scale='linlog')
 plt.xlim(600, 850)
 dp.plot(lda_nw, I_nw)
 
@@ -161,6 +161,11 @@ i1_ref_na = np.argmin(np.abs(lda_ol_na - lda1_ref_na))
 E_3p_na = -ER / m1_ref_na**2 - cs.h * cs.c / lda_ol_na[i1_ref_na]
 lda1_tl_na = cs.c * cs.h / (-ER / m1_na**2 - E_3p_na)
 
+print(ds.tbl([
+  ds.lst(m1_na, name='m'),
+  ds.lst(lda1_tl_na, name='λ', unit='m')
+], name='First side series of sodium'))
+
 # 2. Side series
 lda2_ref_na = 589 * cs.nano
 m2_na = np.arange(4, 10)
@@ -170,11 +175,22 @@ E_3s_na = E_3p_na - cs.h * cs.c / lda_ol_na[i2_ref_na]
 delta_s_na = 3.0 - sqrt(-ER / E_3s_na)
 lda2_tl_na = cs.c * cs.h / (-ER / (m2_na - delta_s_na)**2 - E_3p_na)
 
+print(ds.tbl([
+  ds.lst(m2_na, name='m'),
+  ds.lst(lda2_tl_na, name='λ', unit='m')
+], name='Second side series of sodium'))
+
 # Main series
 m3_na = np.arange(4, 6)
 
 delta_p_na = 3.0 - sqrt(-ER / E_3p_na)
 lda3_tl_na = cs.c * cs.h / (-ER / (m3_na - delta_p_na)**2 - E_3s_na)
+
+print(ds.tbl([
+  ds.lst(m3_na, name='m'),
+  ds.lst(lda3_tl_na, name='λ', unit='m')
+], name='Main series of sodium'))
+print()
 
 # Arrange theoretical wavelengths
 m_na = np.concatenate((m1_na, m2_na, m3_na))
@@ -186,11 +202,11 @@ lda_tl_na = lda_tl_na[i_lda_tl_sorted_na]
 
 # Print
 print(ds.tbl([
-  ds.lst(lda_ol_na, d_lda_ol_na, name='λ_o', unit='m')
-]))
+  ds.lst(lda_ol_na, d_lda_ol_na, name='λ_O', unit='m')
+], name='Observed spectral lines of sodium'))
 print(ds.tbl([
-  ds.lst(lda_tl_na, name='λ_t', unit='m')
-]))
+  ds.lst(lda_tl_na, name='λ_E', unit='m')
+], name='Expected spectral lines of sodium'))
 
 i_assign_na = np.array([np.argmin(np.abs(lda_ol_na - lda)) for lda in lda_tl_na])
 d_lda_ol_na = d_lda_ol_na[i_assign_na]
@@ -200,9 +216,9 @@ print(ds.tbl([
   ds.lst(lda_ol_na, d_lda_ol_na, name='λ_o', unit='m'),
   ds.lst(lda_tl_na, name='λ_t', unit='m'),
   ds.dev(lda_ol_na, d_lda_ol_na, lda_tl_na, name='λ_o, λ_t', perc=True)
-]))
+], name='Corresponding observed and expected spectral lines of sodium'))
 
-isInAccScope_na = dst.dev(lda_ol_na, d_lda_ol_na, lda_tl_na) <= 3.0
+isInAccScope_na = dst.dev(lda_ol_na, d_lda_ol_na, lda_tl_na) <= 2.0
 m_na = m_na[isInAccScope_na]
 lda_ol_na = lda_ol_na[isInAccScope_na]
 d_lda_ol_na = d_lda_ol_na[isInAccScope_na]
@@ -212,9 +228,10 @@ print(ds.tbl([
   ds.lst(lda_ol_na, d_lda_ol_na, name='λ_o', unit='m'),
   ds.lst(lda_tl_na, name='λ_t', unit='m'),
   ds.dev(lda_ol_na, d_lda_ol_na, lda_tl_na, name='λ_o, λ_t', perc=True)
-]))
+], name='Corresponding observed and expected spectral lines of sodium with non-significant deviation'))
+print()
 
-# Plot of the first side series
+# Plot of the first sisecondde series
 def lda1_func(m, E_Ry, E_3p, delta_d):
   return cs.c * cs.h / (E_Ry / (m - delta_d)**2 - E_3p)
 
@@ -223,11 +240,14 @@ m1_na = m_na[isInLda1_na]
 lda1_ol_na = lda_ol_na[isInLda1_na]
 d_lda1_ol_na = d_lda_ol_na[isInLda1_na]
 
-dp.initplot(num=6, title=titles[5], xlabel=r'$m$', ylabel=r'$\lambda$ / nm')
-popt1_na, d_popt1_na = dp.fit(m1_na, lda1_ol_na, d_lda1_ol_na, lda1_func, p0=[-13.6 * cs.e, -3 * cs.e, -0.02], plot=True)
+dp.initplot(num=7, title=titles[5], xlabel=r'$m$', ylabel=r'$\lambda$ / nm')
+popt1_na, d_popt1_na = dp.fit(m1_na, lda1_ol_na, d_lda1_ol_na, lda1_func, p0=[-13.6 * cs.e, -3 * cs.e, 0.005], plot=True)
 
+dof1_na = len(lda1_ol_na) - 3
 chi2_1_na = dst.chi2(lda1_ol_na, d_lda1_ol_na, lda1_func(m1_na, *popt1_na))
-chi2_1_red_na = chi2_1_na / (len(lda1_ol_na) - 3)
+chi2_1_red_na = chi2_1_na / dof1_na
+
+p1_fit_na = 1 - chi2.cdf(chi2_1_na, dof1_na)
 
 # Plot of the second side series
 def lda2_func(m, E_Ry, E_3p, delta_s):
@@ -238,18 +258,27 @@ m2_na = m_na[isInLda2_na]
 lda2_ol_na = lda_ol_na[isInLda2_na]
 d_lda2_ol_na = d_lda_ol_na[isInLda2_na]
 
-dp.initplot(num=7, title=titles[6], xlabel=r'$m$', ylabel=r'$\lambda$ / nm')
-popt2_na, d_popt2_na = dp.fit(m2_na, lda2_ol_na, d_lda2_ol_na, lda2_func, p0=[-13.6 * cs.e, -3 * cs.e, -0.02], plot=True)
-
-chi2_2_na = dst.chi2(lda2_ol_na, d_lda2_ol_na, lda2_func(m2_na, *popt2_na))
-chi2_2_red_na = chi2_2_na / (len(lda2_ol_na) - 3)
-
 # Print
-print(ds.val('E_Ry', popt1_na[0], d_popt1_na[0]))
-print(ds.val('E_3p', popt2_na[1], d_popt2_na[1]))
-print(ds.val('E_delta_d'))
+print(ds.val('E_Ry', -ER / cs.e, unit='eV'))
+print(ds.val('E_3p', E_3p_na / cs.e, unit='eV'))
+print(ds.val('Δ_s', delta_s_na))
+print(ds.val('Δ_p', delta_p_na))
+print()
+print(ds.val('E_Ry', popt1_na[0] / cs.e, d_popt1_na[0] / cs.e, unit='eV'))
+print(ds.val('E_3p', popt1_na[1] / cs.e, d_popt1_na[1] / cs.e, unit='eV'))
+print(ds.val('Δ_d', popt1_na[2]))
+print(ds.val('Δ(Δ_d)', d_popt1_na[2]))
+print()
+print(ds.dev(popt1_na[0], d_popt1_na[0], -ER, name='ER', perc=True))
+print(ds.dev(popt1_na[1], d_popt1_na[1], E_3p_na, name='E_3p', perc=True))
+print(ds.dev(popt1_na[2], d_popt1_na[2], 0.0, name='Δ_d'))
+print()
+print(ds.val("χ²", chi2_1_na))
+print(ds.val("χ²_red", chi2_1_red_na))
+print(ds.val("p_fit", p1_fit_na))
+print()
 
 
 
 ### Show plots
-plt.show()
+# plt.show()
