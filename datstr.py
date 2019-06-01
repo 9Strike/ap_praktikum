@@ -25,6 +25,12 @@ def val(name, val, err=0.0, syserr=0.0, unit='', prefix=True):
   if syserr != 0.0 and err == 0.0:
     raise ValueError('If syserr is specified one must also specify err')
 
+  if err < 0.0:
+    raise ValueError('The Uncertainty must be greater than zero')
+
+  if abs(val) < err:
+    print('Warning: The Uncertainty is greater than the value itself.')
+
   out = ''
   if name != '':
     out += name + ' = '
@@ -195,7 +201,7 @@ def tbl(lists, name='', endl=True):
 
   # Print subtitle
   if (name != ''):
-    out += name
+    out += '\n' + name
   return out + ('\n' if endl else '')
 
 def sig(name, val1, err1, val2, err2=0.0, perc=False):
@@ -223,7 +229,7 @@ def dev(val1, err1, val2, err2=0.0, name='', perc=False):
 
   # Returns percental deviation string
   def get_perc(val1,val2,pformat='{:.2f}'):
-    percval = abs(val1 - val2) / val2 * 100
+    percval = abs(val1 - val2) / abs(val2) * 100
     percstr = pformat.format(percval) + '%'
     return percstr
 
