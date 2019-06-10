@@ -15,12 +15,13 @@ from scipy.stats import chi2
 print()
 
 titles = [
-  r'',
-  r'',
-  r'',
-  r'',
-  r'',
-  r''
+  r'Spektrum von Himmelslicht mit und ohne Glas.',
+  r'Absorption $A$ von Glas in Abhängigkeit der Wellenlänge $\lambda$',
+  r'Spektrum von direktem Sonnenlicht',
+  r'Spektrum einer Natriumdampflampe von 300 - 850 nm',
+  r'Spektrum einer Natriumdampflampe von 300 - 540 nm',
+  r'Spektrum einer Natriumdampflampe von 600 - 850 nm',
+  r'Wellenlänge $\lambda$ der ersten Nebenserie von Natrium in Abhängigkeit der zugeordneten Quantenzahl $m$'
 ]
 
 dataConverters = {
@@ -115,18 +116,18 @@ d_lda_ol_na = d_lda_ol_na[i_lda_ol_sorted_na]
 ### Evaluation
 
 ## Sun light
-dp.initplot(num=1, title=titles[0], xlabel=r'$\lambda$ / nm', ylabel=r'$I$ / b.E.')
+dp.initplot(num=1, title=titles[0], xlabel=r'$\lambda$ / nm', ylabel=r'$I$ / b.E.', fignum=True)
 plt.xlim(250, 900)
 dp.plot(lda_g / cs.nano, I_g, label='Spektrum des Himmels durch Glas')
 dp.plot(lda_sk / cs.nano, I_sk, label='Spektrum des Himmels')
 
 A_g = 1 - I_g / I_sk
-dp.initplot(num=2, title=titles[1], xlabel=r'$\lambda$ / nm', ylabel=r'$A$ / b.E.')
+dp.initplot(num=2, title=titles[1], xlabel=r'$\lambda$ / nm', ylabel=r'$A$ / b.E.', fignum=True)
 plt.xlim(320, 800)
 plt.ylim(-0.1, 1.0)
 dp.plot(lda_g / cs.nano, A_g)
 
-dp.initplot(num=3, title=titles[2], xlabel=r'$\lambda$ / nm', ylabel=r'$I$ / b.E.')
+dp.initplot(num=3, title=titles[2], xlabel=r'$\lambda$ / nm', ylabel=r'$I$ / b.E.', fignum=True)
 plt.xlim(350, 800)
 dp.plot(lda_s / cs.nano, I_s)
 
@@ -140,15 +141,15 @@ print()
 
 
 ## Natrium
-dp.initplot(num=4, title=titles[3], xlabel=r'$\lambda$ / nm', ylabel=r'$I$ / b.E.', scale='linlog')
+dp.initplot(num=4, title=titles[3], xlabel=r'$\lambda$ / nm', ylabel=r'$I$ / b.E.', scale='linlog', fignum=True)
 plt.xlim(300, 850)
 dp.plot(lda_ns, I_ns)
 
-dp.initplot(num=5, title=titles[4], xlabel=r'$\lambda$ / nm', ylabel=r'$I$ / b.E.', scale='linlog')
+dp.initplot(num=5, title=titles[4], xlabel=r'$\lambda$ / nm', ylabel=r'$I$ / b.E.', scale='linlog', fignum=True)
 plt.xlim(300, 540)
 dp.plot(lda_nw, I_nw)
 
-dp.initplot(num=6, title=titles[4], xlabel=r'$\lambda$ / nm', ylabel=r'$I$ / b.E.', scale='linlog')
+dp.initplot(num=6, title=titles[5], xlabel=r'$\lambda$ / nm', ylabel=r'$I$ / b.E.', scale='linlog', fignum=True)
 plt.xlim(600, 850)
 dp.plot(lda_nw, I_nw)
 
@@ -231,7 +232,7 @@ print(ds.tbl([
 ], name='Corresponding observed and expected spectral lines of sodium with non-significant deviation'))
 print()
 
-# Plot of the first sisecondde series
+# Plot of the first side series
 def lda1_func(m, E_Ry, E_3p, delta_d):
   return cs.c * cs.h / (E_Ry / (m - delta_d)**2 - E_3p)
 
@@ -240,7 +241,7 @@ m1_na = m_na[isInLda1_na]
 lda1_ol_na = lda_ol_na[isInLda1_na]
 d_lda1_ol_na = d_lda_ol_na[isInLda1_na]
 
-dp.initplot(num=7, title=titles[5], xlabel=r'$m$', ylabel=r'$\lambda$ / nm')
+dp.initplot(num=7, title=titles[6], xlabel=r'$m$', ylabel=r'$\lambda$ / nm', fignum=True)
 popt1_na, d_popt1_na = dp.fit(m1_na, lda1_ol_na, d_lda1_ol_na, lda1_func, p0=[-13.6 * cs.e, -3 * cs.e, 0.005], plot=True)
 
 dof1_na = len(lda1_ol_na) - 3
@@ -281,4 +282,5 @@ print()
 
 
 ### Show plots
-# plt.show()
+dp.savefigs('figures/234')
+plt.show()
