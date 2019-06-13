@@ -1,3 +1,4 @@
+# encoding: utf8
 import datplot as dp
 import datstr as ds
 import matplotlib.pyplot as plt
