@@ -9,7 +9,7 @@ doubleFrameChars = ['║', '═', '╬', '╔', '╗', '╚', '╝', '╠', '╦
 tableChars = singleFrameChars
 
 def sigval(val, err, fix_mul3=True, fix_exp=None, manual_digits=3):
-  if err <= 0.0:
+  if err < 0.0:
     raise ValueError
 
   def exp10(x):
@@ -18,26 +18,38 @@ def sigval(val, err, fix_mul3=True, fix_exp=None, manual_digits=3):
     return int(x // (10**e))
 
   val_exp = exp10(val)
-  err_exp = exp10(err)
-  err_sig_digit = sig_digit(err, err_exp)
-  two_digits = err_sig_digit == 1 or err_sig_digit == 2
 
   if fix_mul3:
     exp_fix = 3 * (val_exp // 3)
   else:
     exp_fix = val_exp
 
-  if err > val:
+  if err == 0.0:
+    val_mant = val * 10**-exp_fix
+    digits = manual_digits - (val_exp - exp_fix)
+    digits = max(digits, 0)
+    val_str = ('{:.' + str(digits) + 'f}').format(val_mant)
+    exp_str = '{:d}'.format(exp_fix)
+    return val_str, '', exp_str
+
+  err_exp = exp10(err)
+  err_sig_digit = sig_digit(err, err_exp)
+  two_digits = err_sig_digit == 1 or err_sig_digit == 2
+
+  if err > abs(val):
     val_mant = val * 10**-exp_fix
     err_mant = err * 10**-exp_fix
-    val_str = ('{:.' + str(manual_digits) + 'f}').format(val_mant)
-    err_str = ('{:.' + str(manual_digits) + 'f}').format(err_mant)
+    digits = val_exp - exp_fix + manual_digits
+    digits = max(digits, 0)
+    val_str = ('{:.' + str(digits) + 'f}').format(val_mant)
+    err_str = ('{:.' + str(digits) + 'f}').format(err_mant)
     exp_str = '{:d}'.format(exp_fix)
     return val_str, err_str, exp_str
   else:
     val_mant = val * 10**-exp_fix
     err_mant = err * 10**-exp_fix
     digits = (val_exp - err_exp) - (val_exp - exp_fix) + two_digits
+    digits = max(digits, 0)
     val_str = ('{:.' + str(digits) + 'f}').format(val_mant)
     err_str = ('{:.' + str(digits) + 'f}').format(err_mant)
     exp_str = '{:d}'.format(exp_fix)
