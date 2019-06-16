@@ -1,11 +1,11 @@
-# encoding: utf8
 import datplot as dp
 import datstr as ds
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.constants as cs
-from numpy import pi, sqrt, sin, cos, sinc
+from numpy import pi, sqrt, sin, cos, tan, sinc
 from scipy.integrate import quad
+from scipy.optimize import brentq
 from scipy.signal import find_peaks
 
 
@@ -257,8 +257,13 @@ dp.plotdata(n_max_sf, x_max_sf, d_x_max_sf, d_n_max_sf)
 w_sf = 2 * lda * f / (s_sc * s_sf)
 d_w_sf = w_sf * sqrt((d_s_sc / s_sc)**2 + (d_s_sf / s_sf)**2)
 
-n_max_sf_theo = np.arange(0.5, 0.5 + len(n_max_sf))
-n_max_sf_theo[0] = 0.0
+def tan_id(x):
+  return tan(x) - x
+
+n_max_sf_theo = np.zeros_like(n_max_sf)
+for i in range(len(n_max_sf_theo)):
+  n_max_sf_theo[i] = brentq(tan_id, -pi/2 + i * pi + pi / 10000, pi/2 + i * pi - pi / 10000) / pi
+
 I_max_sf_theo = I_slit(n_max_sf)
 d_I_max_sf_theo = d_I_slit(n_max_sf, d_n_max_sf)
 
@@ -354,9 +359,17 @@ dp.plot(y_do, I_do_b)
 n_do_exp_b = w_b_do * w_mean_do / (2 * f * lda)
 d_n_do_exp_b = n_do_exp_b * sqrt((d_w_b_do / w_b_do)**2 + (d_w_mean_do / w_mean_do)**2)
 
+k_do_b = 2 * pi / w_mean_do * n_do_b
+k_do_exp_b = 2 * pi / w_mean_do * n_do_exp_b
+d_k_do_exp_b = k_do_exp_b * sqrt((d_w_mean_do / w_mean_do)**2 + (d_n_do_exp_b / n_do_exp_b)**2)
+
 print(ds.val('n_exp', n_do_exp_b, d_n_do_exp_b))
 print(ds.val('n_theo', n_do_b))
 print(ds.sig('n_exp, n_theo', n_do_exp_b, d_n_do_exp_b, n_do_b, perc=True))
+print()
+print(ds.val('k_exp', k_do_exp_b * cs.milli, d_k_do_exp_b * cs.milli, unit='1/mm'))
+print(ds.val('k_theo', k_do_b * cs.milli, unit='1/mm'))
+print(ds.sig('k_exp, k_theo', k_do_exp_b, d_k_do_exp_b, k_do_b, perc=True))
 print()
 
 
